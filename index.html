@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trading Backtesting Tool</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f4f4f4;
+      padding: 20px;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+
+    .input-group {
+      margin-bottom: 20px;
+    }
+
+    .input-group label {
+      font-size: 18px;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .input-group input {
+      font-size: 18px;
+      padding: 8px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .container {
+      display: flex;
+      justify-content: space-around;
+      max-width: 1200px;
+      flex-wrap: wrap;
+      margin: 20px auto;
+    }
+
+    .counter-section {
+      background-color: #ffffff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+      width: 45%;
+      text-align: center;
+      margin: 10px;
+    }
+
+    .count-display {
+      font-size: 32px;
+      font-weight: bold;
+      margin: 20px 0;
+    }
+
+    .button-group {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    button {
+      font-size: 18px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      color: #ffffff;
+    }
+
+    .decrement {
+      background-color: #FF4C4C;
+    }
+
+    .increment {
+      background-color: #4CAF50;
+    }
+
+    .special-increment {
+      background-color: #28a745;
+    }
+
+    .reset, .record {
+      background-color: #ff4d4d;
+      margin-top: 30px;
+      font-size: 20px;
+    }
+
+    .custom-input {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .custom-input input {
+      width: 60px;
+      padding: 10px;
+      font-size: 16px;
+      text-align: center;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    .summary, .total {
+      font-size: 20px;
+      margin-top: 30px;
+    }
+
+    .log {
+      font-size: 18px;
+      margin-top: 30px;
+      text-align: left;
+    }
+
+    .log-list {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    .footer {
+      font-size: 14px;
+      color: #666;
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Trading Backtesting Tool with Independent Counters</h1>
+
+  <!-- Global Inputs for Initial Capital, % Risked, Pip Value, and Cost per Lot -->
+  <div class="input-group">
+    <label for="initial-capital">Initial Capital ($):</label>
+    <input type="number" id="initial-capital" placeholder="Enter initial capital">
+  </div>
+  <div class="input-group">
+    <label for="risk-percentage">% Risked per Trade:</label>
+    <input type="number" id="risk-percentage" placeholder="Enter percentage risked" step="0.01">
+  </div>
+  <div class="input-group">
+    <label for="pip-value">Pip Value:</label>
+    <input type="number" id="pip-value" placeholder="Enter pip value" step="0.01">
+  </div>
+  <div class="input-group">
+    <label for="cost-per-lot">Cost per Lot:</label>
+    <input type="number" id="cost-per-lot" placeholder="Enter cost per lot" step="0.01">
+  </div>
+
+  <div class="container">
+    <!-- Counter 1: 1:1 Corto -->
+    <div class="counter-section" id="counter-1">
+      <h2>1:1 Corto</h2>
+      <div class="count-display" id="count-corto">0</div>
+      <div class="button-group">
+        <button class="decrement" onclick="updateCounter('corto', -1)">-1</button>
+        <button class="increment" onclick="updateCounter('corto', 1)">+1</button>
+      </div>
+      <div class="custom-input">
+        <input type="number" id="corto-custom-value" placeholder="Custom">
+        <input type="number" id="corto-pips" placeholder="Pips to SL">
+        <button onclick="updateCounterWithCustom('corto')">Add</button>
+      </div>
+      <p>Max Win Streak: <span id="corto-max-win-streak">0</span></p>
+      <p>Max Loss Streak: <span id="corto-max-loss-streak">0</span></p>
+      <p>Fee: <span id="corto-fee">0</span></p>
+    </div>
+
+    <!-- Counter 2: 1:1 Largo -->
+    <div class="counter-section" id="counter-2">
+      <h2>1:1 Largo</h2>
+      <div class="count-display" id="count-largo">0</div>
+      <div class="button-group">
+        <button class="decrement" onclick="updateCounter('largo', -1)">-1</button>
+        <button class="increment" onclick="updateCounter('largo', 1)">+1</button>
+      </div>
+      <div class="custom-input">
+        <input type="number" id="largo-custom-value" placeholder="Custom">
+        <input type="number" id="largo-pips" placeholder="Pips to SL">
+        <button onclick="updateCounterWithCustom('largo')">Add</button>
+      </div>
+      <p>Max Win Streak: <span id="largo-max-win-streak">0</span></p>
+      <p>Max Loss Streak: <span id="largo-max-loss-streak">0</span></p>
+      <p>Fee: <span id="largo-fee">0</span></p>
+    </div>
+
+    <!-- Counter 3: 1:1.3 -->
+    <div class="counter-section" id="counter-3">
+      <h2>1:1.3</h2>
+      <div class="count-display" id="count-1.3">0</div>
+      <div class="button-group">
+        <button class="decrement" onclick="updateCounter('1.3', -1)">-1</button>
+        <button class="increment" onclick="updateCounter('1.3', 1.3)">+1.3</button>
+      </div>
+      <div class="custom-input">
+        <input type="number" id="1.3-custom-value" placeholder="Custom">
+        <input type="number" id="1.3-pips" placeholder="Pips to SL">
+        <button onclick="updateCounterWithCustom('1.3')">Add</button>
+      </div>
+      <p>Max Win Streak: <span id="1.3-max-win-streak">0</span></p>
+      <p>Max Loss Streak: <span id="1.3-max-loss-streak">0</span></p>
+      <p>Fee: <span id="1.3-fee">0</span></p>
+    </div>
+
+    <!-- Counter 4: 1:1.4 -->
+    <div class="counter-section" id="counter-4">
+      <h2>1:1.4</h2>
+      <div class="count-display" id="count-1.4">0</div>
+      <div class="button-group">
+        <button class="decrement" onclick="updateCounter('1.4', -1)">-1</button>
+        <button class="increment" onclick="updateCounter('1.4', 1.4)">+1.4</button>
+      </div>
+      <div class="custom-input">
+        <input type="number" id="1.4-custom-value" placeholder="Custom">
+        <input type="number" id="1.4-pips" placeholder="Pips to SL">
+        <button onclick="updateCounterWithCustom('1.4')">Add</button>
+      </div>
+      <p>Max Win Streak: <span id="1.4-max-win-streak">0</span></p>
+      <p>Max Loss Streak: <span id="1.4-max-loss-streak">0</span></p>
+      <p>Fee: <span id="1.4-fee">0</span></p>
+    </div>
+  </div>
+
+  <!-- Grand Total Summary -->
+  <div class="summary">
+    <h2>Grand Total</h2>
+    <p>Total Win Streak: <span id="grand-max-win-streak">0</span></p>
+    <p>Total Loss Streak: <span id="grand-max-loss-streak">0</span></p>
+    <p>Total Fee: <span id="grand-total-fee">0</span></p>
+  </div>
+
+  <script>
+    // Define counters and streaks for each type
+    const counters = {
+      corto: { balance: 0, winStreak: 0, lossStreak: 0, maxWinStreak: 0, maxLossStreak: 0 },
+      largo: { balance: 0, winStreak: 0, lossStreak: 0, maxWinStreak: 0, maxLossStreak: 0 },
+      "1.3": { balance: 0, winStreak: 0, lossStreak: 0, maxWinStreak: 0, maxLossStreak: 0 },
+      "1.4": { balance: 0, winStreak: 0, lossStreak: 0, maxWinStreak: 0, maxLossStreak: 0 }
+    };
+
+    // Fee calculation for each trade
+    function calculateFee(type) {
+      const pipValue = parseFloat(document.getElementById("pip-value").value) || 1;
+      const pips = parseFloat(document.getElementById(`${type}-pips`).value) || 1;
+      counters[type].fee = counters[type].balance / (pipValue * pips);
+      document.getElementById(`${type}-fee`).innerText = counters[type].fee.toFixed(2);
+      updateGrandTotal();
+    }
+
+    // Function to update the counter based on a positive or negative action
+    function updateCounter(type, amount) {
+      counters[type].balance += amount;
+      if (amount > 0) {
+        counters[type].winStreak++;
+        counters[type].lossStreak = 0;
+        if (counters[type].winStreak > counters[type].maxWinStreak) counters[type].maxWinStreak = counters[type].winStreak;
+      } else {
+        counters[type].lossStreak++;
+        counters[type].winStreak = 0;
+        if (counters[type].lossStreak > counters[type].maxLossStreak) counters[type].maxLossStreak = counters[type].lossStreak;
+      }
+      calculateFee(type);
+      updateDisplay(type);
+    }
+
+    // Custom value handler
+    function updateCounterWithCustom(type) {
+      const customValue = parseFloat(document.getElementById(`${type}-custom-value`).value) || 0;
+      updateCounter(type, customValue);
+    }
+
+    function updateDisplay(type) {
+      document.getElementById(`count-${type}`).innerText = counters[type].balance.toFixed(2);
+      document.getElementById(`${type}-max-win-streak`).innerText = counters[type].maxWinStreak;
+      document.getElementById(`${type}-max-loss-streak`).innerText = counters[type].maxLossStreak;
+    }
+
+    function updateGrandTotal() {
+      const totalFee = Object.values(counters).reduce((sum, counter) => sum + counter.fee, 0);
+      document.getElementById("grand-total-fee").innerText = totalFee.toFixed(2);
+    }
+  </script>
+
+</body>
+</html>
