@@ -180,7 +180,7 @@
   <div class="section">
     <h2>General Settings</h2>
     <label for="initial-capital">Initial Capital ($):</label>
-    <input type="number" id="initial-capital" placeholder="Enter initial capital" value="10000">
+    <input type="number" id="initial-capital" placeholder="Enter initial capital" value="10000" onchange="updateInitialCapital()">
 
     <label for="risk-percentage">Risk Percentage per Trade (%):</label>
     <input type="number" id="risk-percentage" placeholder="Enter risk percentage" step="0.01" value="1">
@@ -196,9 +196,10 @@
   <div class="section">
     <h2>Enter Trade Details</h2>
 
+    <label for="trade-date">Trade Date:</label>
     <div class="date-group">
       <button class="date-button" onclick="adjustDate(-1)">-</button>
-      <input type="date" id="trade-date">
+      <input type="date" id="trade-date" placeholder="Select Trade Date">
       <button class="date-button" onclick="adjustDate(1)">+</button>
     </div>
 
@@ -250,6 +251,13 @@
   let maxDrawdown = 0, peakBalance = initialCapital;
   let totalWinningPnL = 0, totalLosingPnL = 0;
   let tradeLog = [];
+
+  function updateInitialCapital() {
+    initialCapital = parseFloat(document.getElementById("initial-capital").value);
+    currentBalance = initialCapital;
+    peakBalance = initialCapital;
+    document.getElementById("cumulative-balance").textContent = currentBalance.toFixed(2);
+  }
 
   function adjustDate(increment) {
     const dateInput = document.getElementById("trade-date");
