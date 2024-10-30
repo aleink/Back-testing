@@ -221,7 +221,7 @@
     <p>Win Rate: <span id="win-rate">0%</span></p>
     <p>Max Win Streak: <span id="max-win-streak">0</span></p>
     <p>Max Loss Streak: <span id="max-loss-streak">0</span></p>
-    <p>Max Drawdown: <span id="max-drawdown">0%</span></p>
+    <p>Max Drawdown: <span id="max-drawdown">0% / $0</span></p>
     <p>Average Win: <span id="average-win">0</span></p>
     <p>Average Loss: <span id="average-loss">0</span></p>
     <p>Profit Factor: <span id="profit-factor">0</span></p>
@@ -247,8 +247,8 @@
   let totalTrades = 0, wins = 0, losses = 0;
   let winStreak = 0, lossStreak = 0, maxWinStreak = 0, maxLossStreak = 0;
   let totalFees = 0, totalPnLAfterFees = 0;
-  let averageWin = 0, averageLoss = 0;
-  let profitFactor = 0;
+  let maxDrawdown = 0, peakBalance = initialCapital;
+  let totalWinningPnL = 0, totalLosingPnL = 0;
   let tradeLog = [];
 
   function adjustDate(increment) {
@@ -279,11 +279,13 @@
     let profitOrLoss = 0;
     if (outcome === "Win") {
       profitOrLoss = riskAmount * rr;
+      totalWinningPnL += profitOrLoss;
       wins++;
       winStreak++;
       lossStreak = 0;
     } else {
       profitOrLoss = -riskAmount;
+      totalLosingPnL += Math.abs(profitOrLoss);
       losses++;
       lossStreak++;
       winStreak = 0;
@@ -297,6 +299,12 @@
     maxWinStreak = Math.max(maxWinStreak, winStreak);
     maxLossStreak = Math.max(maxLossStreak, lossStreak);
 
+    if (currentBalance > peakBalance) {
+      peakBalance = currentBalance;
+    }
+    const drawdown = peakBalance - currentBalance;
+    maxDrawdown = Math.max(maxDrawdown, drawdown);
+
     tradeLog.push({ date, riskAmount: riskAmount.toFixed(2), lots: lots.toFixed(2), rr, slDistance, profitOrLoss: profitOrLoss.toFixed(2), fee: fee.toFixed(2), finalPnL: finalPnL.toFixed(2), balance: currentBalance.toFixed(2) });
 
     updateSummary();
@@ -308,9 +316,10 @@
     document.getElementById("win-rate").textContent = ((wins / totalTrades) * 100).toFixed(2) + "%";
     document.getElementById("max-win-streak").textContent = maxWinStreak;
     document.getElementById("max-loss-streak").textContent = maxLossStreak;
-    document.getElementById("average-win").textContent = (totalPnLAfterFees / wins).toFixed(2);
-    document.getElementById("average-loss").textContent = (totalPnLAfterFees / losses).toFixed(2);
-    document.getElementById("profit-factor").textContent = ((averageWin * wins) / (averageLoss * losses)).toFixed(2);
+    document.getElementById("max-drawdown").textContent = `${((maxDrawdown / peakBalance) * 100).toFixed(2)}% / $${maxDrawdown.toFixed(2)}`;
+    document.getElementById("average-win").textContent = (totalWinningPnL / wins).toFixed(2);
+    document.getElementById("average-loss").textContent = (totalLosingPnL / losses).toFixed(2);
+    document.getElementById("profit-factor").textContent = (totalWinningPnL / totalLosingPnL).toFixed(2);
     document.getElementById("total-fees").textContent = totalFees.toFixed(2);
     document.getElementById("pnl-after-fees").textContent = totalPnLAfterFees.toFixed(2);
     document.getElementById("cumulative-balance").textContent = currentBalance.toFixed(2);
@@ -328,7 +337,8 @@
 
   function resetBacktest() {
     currentBalance = initialCapital;
-    totalTrades = wins = losses = winStreak = lossStreak = maxWinStreak = maxLossStreak = totalFees = totalPnLAfterFees = averageWin = averageLoss = profitFactor = 0;
+    totalTrades = wins = losses = winStreak = lossStreak = maxWinStreak = maxLossStreak = totalFees = totalPnLAfterFees = totalWinningPnL = totalLosingPnL = maxDrawdown = 0;
+    peakBalance = initialCapital;
     tradeLog = [];
     updateSummary();
     updateTradeLog();
