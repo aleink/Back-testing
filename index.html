@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ultimate Backtesting Tool</title>
   <style>
+    /* Styling as before */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -274,8 +275,31 @@
 </div>
 
 <script>
-  // JavaScript functions for date adjustment, trade recording, etc. remain the same
-  // For brevity, only necessary updates to styling have been applied above.
+  function adjustDate(increment) {
+    const dateInput = document.getElementById("trade-date");
+    let currentDate = new Date(dateInput.value || new Date());
+
+    do {
+      currentDate.setDate(currentDate.getDate() + increment);
+    } while (shouldSkipDate(currentDate));
+
+    dateInput.value = currentDate.toISOString().split("T")[0];
+  }
+
+  function shouldSkipDate(date) {
+    const dayOfWeek = date.getDay();
+    return (
+      (dayOfWeek === 0 && document.getElementById("skip-sunday").checked) ||
+      (dayOfWeek === 6 && document.getElementById("skip-saturday").checked) ||
+      (dayOfWeek === 5 && document.getElementById("skip-friday").checked) ||
+      (dayOfWeek === 1 && document.getElementById("skip-monday").checked) ||
+      (dayOfWeek === 2 && document.getElementById("skip-tuesday").checked) ||
+      (dayOfWeek === 3 && document.getElementById("skip-wednesday").checked) ||
+      (dayOfWeek === 4 && document.getElementById("skip-thursday").checked)
+    );
+  }
+
+  // Other JavaScript functions (recordTrade, updateSummary, etc.) remain the same.
 </script>
 
 </body>
