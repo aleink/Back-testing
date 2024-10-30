@@ -3,18 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ultimate Backtesting Tool</title>
+  <title>Backtesting Tool</title>
   <style>
-    /* Styling as before */
+    /* Reset and body styles */
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Roboto', sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     }
-
     body {
-      background-color: #f0f2f5;
+      background-color: #fefefe;
       padding: 20px;
       display: flex;
       justify-content: center;
@@ -22,175 +21,156 @@
       flex-direction: column;
       color: #333;
     }
-
     h1 {
-      font-size: 32px;
+      font-size: 24px;
+      font-weight: 600;
       color: #333;
-      margin-bottom: 10px;
+      text-align: center;
+      margin-bottom: 20px;
     }
-
+    /* Container and section styling */
     .container {
-      max-width: 800px;
+      max-width: 500px;
       width: 100%;
       background-color: #fff;
-      border-radius: 10px;
+      border-radius: 15px;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-      padding: 30px;
+      padding: 20px;
       margin-top: 20px;
     }
-
     .section {
       margin-bottom: 20px;
     }
-
     label {
       display: block;
-      font-weight: bold;
-      margin-bottom: 8px;
+      font-weight: 500;
+      margin-bottom: 6px;
       color: #555;
     }
-
-    input, select {
+    /* Input and button styles */
+    input[type="number"], input[type="date"] {
       width: 100%;
-      padding: 10px;
+      padding: 12px;
       font-size: 16px;
-      margin-bottom: 15px;
+      margin-bottom: 10px;
       border: 1px solid #ddd;
       border-radius: 8px;
+      background-color: #f9f9f9;
       transition: border-color 0.3s ease;
     }
-
-    input:focus, select:focus {
-      border-color: #007bff;
+    input[type="number"]:focus, input[type="date"]:focus {
+      border-color: #007aff;
       outline: none;
     }
-
-    .button-group, .date-group {
+    .date-group {
       display: flex;
-      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
       margin-top: 10px;
     }
-
-    button {
-      padding: 12px 20px;
-      font-size: 16px;
-      font-weight: bold;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-
-    .win-button {
-      background-color: #28a745;
-    }
-
-    .win-button:hover {
-      background-color: #218838;
-    }
-
-    .loss-button {
-      background-color: #dc3545;
-    }
-
-    .loss-button:hover {
-      background-color: #c82333;
-    }
-
-    .reset-button {
-      background-color: #007bff;
-      margin-top: 10px;
-    }
-
-    .reset-button:hover {
-      background-color: #0056b3;
-    }
-
     .date-button {
-      background-color: #007bff;
+      background-color: #007aff;
       color: #fff;
-      font-weight: bold;
       font-size: 20px;
       width: 40px;
       height: 40px;
-      border-radius: 50%;
+      border-radius: 8px;
       border: none;
       cursor: pointer;
       transition: background-color 0.3s ease;
     }
-
     .date-button:hover {
-      background-color: #0056b3;
+      background-color: #005bb5;
     }
-
+    .button-group {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .win-button, .loss-button {
+      flex: 1;
+      padding: 12px;
+      font-size: 16px;
+      font-weight: 500;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      color: #fff;
+    }
+    .win-button {
+      background-color: #34c759;
+    }
+    .win-button:hover {
+      background-color: #2a9d4d;
+    }
+    .loss-button {
+      background-color: #ff3b30;
+    }
+    .loss-button:hover {
+      background-color: #d12a21;
+    }
+    .reset-button, .export-button {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      font-weight: 500;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 15px;
+      transition: background-color 0.3s ease;
+    }
+    .reset-button {
+      background-color: #007aff;
+    }
+    .reset-button:hover {
+      background-color: #005bb5;
+    }
+    .export-button {
+      background-color: #34c759;
+    }
+    .export-button:hover {
+      background-color: #2a9d4d;
+    }
+    /* Summary and log section */
     .summary, .log-section {
-      background-color: #f8f9fa;
-      padding: 20px;
+      background-color: #f2f2f7;
+      padding: 15px;
       border-radius: 10px;
       margin-top: 20px;
     }
-
     .summary h2, .log-section h2 {
-      font-size: 24px;
-      color: #333;
-      margin-bottom: 15px;
-    }
-
-    .summary p, .log-section p {
       font-size: 18px;
-      margin: 10px 0;
-      color: #555;
+      color: #333;
+      margin-bottom: 10px;
+      font-weight: 500;
     }
-
-    .days-to-skip {
-      display: flex;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      margin-bottom: 20px; /* Added extra space below the days-to-skip section */
+    .summary p, .log-section p {
+      font-size: 16px;
+      color: #666;
+      margin: 8px 0;
     }
-
-    .days-to-skip label {
-      margin: 0 10px;
-      font-size: 14px;
-      color: #555;
-    }
-    
     .trade-log {
-      max-height: 250px;
+      max-height: 200px;
       overflow-y: auto;
-      margin-top: 15px;
+      margin-top: 10px;
       border-top: 1px solid #ddd;
       padding-top: 10px;
     }
-
     .trade-log ul {
       list-style-type: none;
       padding: 0;
     }
-
     .trade-log li {
-      padding: 10px;
+      padding: 8px;
       border-bottom: 1px solid #ddd;
+      font-size: 14px;
+      color: #333;
     }
-
     .trade-log li:last-child {
       border-bottom: none;
-    }
-    
-    .export-button {
-      background-color: #007bff;
-      padding: 12px;
-      border-radius: 8px;
-      font-size: 16px;
-      font-weight: bold;
-      color: #fff;
-      margin-top: 20px;
-      cursor: pointer;
-    }
-
-    .export-button:hover {
-      background-color: #0056b3;
     }
   </style>
 </head>
@@ -223,16 +203,6 @@
       <button class="date-button" onclick="adjustDate(-1)">-</button>
       <input type="date" id="trade-date">
       <button class="date-button" onclick="adjustDate(1)">+</button>
-    </div>
-
-    <div class="days-to-skip">
-      <label><input type="checkbox" id="skip-sunday" checked> Sunday</label>
-      <label><input type="checkbox" id="skip-saturday" checked> Saturday</label>
-      <label><input type="checkbox" id="skip-friday"> Friday</label>
-      <label><input type="checkbox" id="skip-monday"> Monday</label>
-      <label><input type="checkbox" id="skip-tuesday"> Tuesday</label>
-      <label><input type="checkbox" id="skip-wednesday"> Wednesday</label>
-      <label><input type="checkbox" id="skip-thursday"> Thursday</label>
     </div>
 
     <label for="rr">Risk-Reward Ratio (RR):</label>
@@ -278,25 +248,8 @@
   function adjustDate(increment) {
     const dateInput = document.getElementById("trade-date");
     let currentDate = new Date(dateInput.value || new Date());
-
-    do {
-      currentDate.setDate(currentDate.getDate() + increment);
-    } while (shouldSkipDate(currentDate));
-
+    currentDate.setDate(currentDate.getDate() + increment);
     dateInput.value = currentDate.toISOString().split("T")[0];
-  }
-
-  function shouldSkipDate(date) {
-    const dayOfWeek = date.getDay();
-    return (
-      (dayOfWeek === 0 && document.getElementById("skip-sunday").checked) ||
-      (dayOfWeek === 6 && document.getElementById("skip-saturday").checked) ||
-      (dayOfWeek === 5 && document.getElementById("skip-friday").checked) ||
-      (dayOfWeek === 1 && document.getElementById("skip-monday").checked) ||
-      (dayOfWeek === 2 && document.getElementById("skip-tuesday").checked) ||
-      (dayOfWeek === 3 && document.getElementById("skip-wednesday").checked) ||
-      (dayOfWeek === 4 && document.getElementById("skip-thursday").checked)
-    );
   }
 
   // Other JavaScript functions (recordTrade, updateSummary, etc.) remain the same.
