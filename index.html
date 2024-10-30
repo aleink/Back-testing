@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ultimate Backtesting Tool</title>
   <style>
-    /* General styles for a modern look */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -82,19 +81,19 @@
       transition: background-color 0.3s ease;
     }
 
-    .add-trade {
+    .win-button {
       background-color: #28a745;
     }
 
-    .add-trade:hover {
+    .win-button:hover {
       background-color: #218838;
     }
 
-    .reset {
+    .loss-button {
       background-color: #dc3545;
     }
 
-    .reset:hover {
+    .loss-button:hover {
       background-color: #c82333;
     }
 
@@ -138,6 +137,21 @@
     .trade-log li:last-child {
       border-bottom: none;
     }
+    
+    .export-button {
+      background-color: #007bff;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      color: #fff;
+      margin-top: 20px;
+      cursor: pointer;
+    }
+
+    .export-button:hover {
+      background-color: #0056b3;
+    }
   </style>
 </head>
 <body>
@@ -154,10 +168,10 @@
     <label for="risk-percentage">Risk Percentage per Trade (%):</label>
     <input type="number" id="risk-percentage" placeholder="Enter risk percentage" step="0.01" value="1">
 
-    <label for="pip-value">Pip Value (Optional):</label>
+    <label for="pip-value">Pip Value:</label>
     <input type="number" id="pip-value" placeholder="Enter pip value" step="0.01">
 
-    <label for="cost-per-lot">Cost per Lot (Optional):</label>
+    <label for="cost-per-lot">Cost per Lot:</label>
     <input type="number" id="cost-per-lot" placeholder="Enter cost per lot" step="0.01">
   </div>
 
@@ -165,11 +179,8 @@
   <div class="section">
     <h2>Enter Trade Details</h2>
 
-    <label for="trade-type">Trade Type:</label>
-    <select id="trade-type">
-      <option value="Long">Long</option>
-      <option value="Short">Short</option>
-    </select>
+    <label for="trade-date">Trade Date:</label>
+    <input type="date" id="trade-date">
 
     <label for="rr">Risk-Reward Ratio (RR):</label>
     <input type="number" id="rr" placeholder="Enter RR" step="0.01">
@@ -177,15 +188,9 @@
     <label for="sl-distance">SL Distance in Pips:</label>
     <input type="number" id="sl-distance" placeholder="Enter SL distance in pips">
 
-    <label for="win-loss">Outcome:</label>
-    <select id="win-loss">
-      <option value="Win">Win</option>
-      <option value="Loss">Loss</option>
-    </select>
-
     <div class="button-group">
-      <button class="add-trade" onclick="addTrade()">Add Trade</button>
-      <button class="reset" onclick="resetBacktest()">Reset Backtest</button>
+      <button class="win-button" onclick="recordTrade('Win')">Record Win</button>
+      <button class="loss-button" onclick="recordTrade('Loss')">Record Loss</button>
     </div>
   </div>
 
@@ -209,6 +214,7 @@
     <div class="trade-log">
       <ul id="trade-log"></ul>
     </div>
+    <button class="export-button" onclick="exportLog()">Export Results</button>
   </div>
 </div>
 
@@ -219,17 +225,19 @@
   let maxWinStreak = 0, maxLossStreak = 0, currentWinStreak = 0, currentLossStreak = 0;
   let maxDrawdown = 0, maxBalance = initialCapital;
   let totalWinAmount = 0, totalLossAmount = 0;
+  let tradeHistory = [];
 
-  function addTrade() {
-    const riskPercentage = parseFloat(document.getElementById("risk-percentage").value) / 100;
+  function recordTrade(outcome) {
+    const tradeDate = document.getElementById("trade-date").value;
     const rr = parseFloat(document.getElementById("rr").value);
-    const outcome = document.getElementById("win-loss").value;
     const slDistance = parseFloat(document.getElementById("sl-distance").value);
-    const pipValue = parseFloat(document.getElementById("pip-value").value) || 0;
-    const costPerLot = parseFloat(document.getElementById("cost-per-lot").value) || 0;
+    const pipValue = parseFloat(document.getElementById("pip-value").value);
+    const costPerLot = parseFloat(document.getElementById("cost-per-lot").value);
+    const riskPercentage = parseFloat(document.getElementById("risk-percentage").value) / 100;
 
     const riskAmount = currentBalance * riskPercentage;
-    let fee = (pipValue * slDistance * costPerLot) || 0;
+    const lotSize = riskAmount / (slDistance * pipValue);
+    const fee = lotSize * slDistance * costPerLot;
     let realizedPL = 0;
 
     if (outcome === "Win") {
@@ -254,10 +262,11 @@
     const drawdown = ((maxBalance - currentBalance) / maxBalance) * 100;
     maxDrawdown = Math.max(maxDrawdown, drawdown);
 
-    // Update totals
+    // Update totals and record trade
     totalTrades++;
+    tradeHistory.push({ tradeDate, outcome, rr, slDistance, lotSize, fee, realizedPL, balance: currentBalance });
     updateSummary();
-    logTrade(outcome, rr, realizedPL);
+    logTrade(tradeDate, outcome, rr, realizedPL);
   }
 
   function updateSummary() {
@@ -277,11 +286,27 @@
     document.getElementById("cumulative-balance").innerText = currentBalance.toFixed(2);
   }
 
-  function logTrade(outcome, rr, realizedPL) {
+  function logTrade(date, outcome, rr, realizedPL) {
     const tradeLog = document.getElementById("trade-log");
     const logEntry = document.createElement("li");
-    logEntry.innerText = `Trade ${totalTrades}: ${outcome} | RR: ${rr} | P/L: ${realizedPL.toFixed(2)} | Balance: ${currentBalance.toFixed(2)}`;
+    logEntry.innerText = `${date}: ${outcome} | RR: ${rr} | P/L: ${realizedPL.toFixed(2)} | Balance: ${currentBalance.toFixed(2)}`;
     tradeLog.appendChild(logEntry);
+  }
+
+  function exportLog() {
+    const csvContent = "data:text/csv;charset=utf-8,"
+      + "Date,Outcome,RR,SL Distance,Lot Size,Fee,Realized P/L,Balance\n"
+      + tradeHistory.map(trade =>
+        `${trade.tradeDate},${trade.outcome},${trade.rr},${trade.slDistance},${trade.lotSize.toFixed(2)},${trade.fee.toFixed(2)},${trade.realizedPL.toFixed(2)},${trade.balance.toFixed(2)}`
+      ).join("\n");
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "trade_log.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   }
 
   function resetBacktest() {
@@ -290,6 +315,7 @@
     totalTrades = wins = losses = maxWinStreak = maxLossStreak = currentWinStreak = currentLossStreak = totalWinAmount = totalLossAmount = 0;
     maxDrawdown = 0;
     maxBalance = initialCapital;
+    tradeHistory = [];
     document.getElementById("trade-log").innerHTML = "";
     updateSummary();
   }
