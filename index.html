@@ -3,77 +3,126 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ultimate Backtesting Tracking Tool</title>
+  <title>Ultimate Backtesting Tool</title>
   <style>
+    /* General styles for a modern look */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Roboto', sans-serif;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
+      background-color: #f0f2f5;
       padding: 20px;
-      text-align: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      color: #333;
     }
 
     h1 {
-      font-size: 28px;
-      margin-bottom: 20px;
+      font-size: 32px;
+      color: #333;
+      margin-bottom: 10px;
     }
 
-    .input-group, .trade-section, .summary, .log-section {
+    .container {
+      max-width: 800px;
+      width: 100%;
       background-color: #fff;
-      padding: 20px;
       border-radius: 10px;
-      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      padding: 30px;
+      margin-top: 20px;
+    }
+
+    .section {
       margin-bottom: 20px;
-      text-align: left;
-      max-width: 600px;
-      margin: 20px auto;
     }
 
     label {
       display: block;
-      font-size: 16px;
-      margin-bottom: 5px;
+      font-weight: bold;
+      margin-bottom: 8px;
+      color: #555;
     }
 
     input, select {
       width: 100%;
-      padding: 8px;
-      margin-bottom: 10px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
+      padding: 10px;
       font-size: 16px;
+      margin-bottom: 15px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      transition: border-color 0.3s ease;
+    }
+
+    input:focus, select:focus {
+      border-color: #007bff;
+      outline: none;
     }
 
     .button-group {
       display: flex;
       justify-content: space-between;
+      margin-top: 10px;
     }
 
     button {
+      padding: 12px 20px;
       font-size: 16px;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
+      font-weight: bold;
       color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
     }
 
     .add-trade {
-      background-color: #4CAF50;
+      background-color: #28a745;
+    }
+
+    .add-trade:hover {
+      background-color: #218838;
     }
 
     .reset {
-      background-color: #FF4C4C;
+      background-color: #dc3545;
+    }
+
+    .reset:hover {
+      background-color: #c82333;
+    }
+
+    .summary, .log-section {
+      background-color: #f8f9fa;
+      padding: 20px;
+      border-radius: 10px;
+      margin-top: 20px;
+    }
+
+    .summary h2, .log-section h2 {
+      font-size: 24px;
+      color: #333;
+      margin-bottom: 15px;
     }
 
     .summary p, .log-section p {
       font-size: 18px;
       margin: 10px 0;
+      color: #555;
     }
 
     .trade-log {
-      max-height: 300px;
+      max-height: 250px;
       overflow-y: auto;
-      margin-top: 20px;
+      margin-top: 15px;
+      border-top: 1px solid #ddd;
+      padding-top: 10px;
     }
 
     .trade-log ul {
@@ -86,70 +135,80 @@
       border-bottom: 1px solid #ddd;
     }
 
-    canvas {
-      max-width: 100%;
+    .trade-log li:last-child {
+      border-bottom: none;
     }
   </style>
 </head>
 <body>
 
-<h1>Ultimate Backtesting Tracking Tool</h1>
+<h1>Backtesting Tool</h1>
 
-<div class="input-group">
-  <label for="initial-capital">Initial Capital ($):</label>
-  <input type="number" id="initial-capital" placeholder="Enter initial capital" value="10000">
+<div class="container">
+  <!-- General Settings -->
+  <div class="section">
+    <h2>General Settings</h2>
+    <label for="initial-capital">Initial Capital ($):</label>
+    <input type="number" id="initial-capital" placeholder="Enter initial capital" value="10000">
 
-  <label for="risk-percentage">Risk Percentage per Trade (%):</label>
-  <input type="number" id="risk-percentage" placeholder="Enter risk percentage" step="0.01" value="1">
+    <label for="risk-percentage">Risk Percentage per Trade (%):</label>
+    <input type="number" id="risk-percentage" placeholder="Enter risk percentage" step="0.01" value="1">
 
-  <label for="pip-value">Pip Value (Optional):</label>
-  <input type="number" id="pip-value" placeholder="Enter pip value" step="0.01">
+    <label for="pip-value">Pip Value (Optional):</label>
+    <input type="number" id="pip-value" placeholder="Enter pip value" step="0.01">
 
-  <label for="cost-per-lot">Cost per Lot (Optional):</label>
-  <input type="number" id="cost-per-lot" placeholder="Enter cost per lot" step="0.01">
-</div>
-
-<div class="trade-section">
-  <h2>Enter Trade Details</h2>
-
-  <label for="trade-type">Trade Type:</label>
-  <select id="trade-type">
-    <option value="Long">Long</option>
-    <option value="Short">Short</option>
-  </select>
-
-  <label for="rr">Risk-Reward Ratio (RR):</label>
-  <input type="number" id="rr" placeholder="Enter RR" step="0.01">
-
-  <label for="win-loss">Outcome:</label>
-  <select id="win-loss">
-    <option value="Win">Win</option>
-    <option value="Loss">Loss</option>
-  </select>
-
-  <div class="button-group">
-    <button class="add-trade" onclick="addTrade()">Add Trade</button>
-    <button class="reset" onclick="resetBacktest()">Reset Backtest</button>
+    <label for="cost-per-lot">Cost per Lot (Optional):</label>
+    <input type="number" id="cost-per-lot" placeholder="Enter cost per lot" step="0.01">
   </div>
-</div>
 
-<div class="summary">
-  <h2>Performance Summary</h2>
-  <p>Total Trades: <span id="total-trades">0</span></p>
-  <p>Win Rate: <span id="win-rate">0%</span></p>
-  <p>Max Win Streak: <span id="max-win-streak">0</span></p>
-  <p>Max Loss Streak: <span id="max-loss-streak">0</span></p>
-  <p>Max Drawdown: <span id="max-drawdown">0%</span></p>
-  <p>Average Win: <span id="average-win">0</span></p>
-  <p>Average Loss: <span id="average-loss">0</span></p>
-  <p>Profit Factor: <span id="profit-factor">0</span></p>
-  <p>Cumulative Balance: <span id="cumulative-balance">10000</span></p>
-</div>
+  <!-- Trade Entry -->
+  <div class="section">
+    <h2>Enter Trade Details</h2>
 
-<div class="log-section">
-  <h2>Trade Log</h2>
-  <div class="trade-log">
-    <ul id="trade-log"></ul>
+    <label for="trade-type">Trade Type:</label>
+    <select id="trade-type">
+      <option value="Long">Long</option>
+      <option value="Short">Short</option>
+    </select>
+
+    <label for="rr">Risk-Reward Ratio (RR):</label>
+    <input type="number" id="rr" placeholder="Enter RR" step="0.01">
+
+    <label for="sl-distance">SL Distance in Pips:</label>
+    <input type="number" id="sl-distance" placeholder="Enter SL distance in pips">
+
+    <label for="win-loss">Outcome:</label>
+    <select id="win-loss">
+      <option value="Win">Win</option>
+      <option value="Loss">Loss</option>
+    </select>
+
+    <div class="button-group">
+      <button class="add-trade" onclick="addTrade()">Add Trade</button>
+      <button class="reset" onclick="resetBacktest()">Reset Backtest</button>
+    </div>
+  </div>
+
+  <!-- Summary Section -->
+  <div class="summary">
+    <h2>Performance Summary</h2>
+    <p>Total Trades: <span id="total-trades">0</span></p>
+    <p>Win Rate: <span id="win-rate">0%</span></p>
+    <p>Max Win Streak: <span id="max-win-streak">0</span></p>
+    <p>Max Loss Streak: <span id="max-loss-streak">0</span></p>
+    <p>Max Drawdown: <span id="max-drawdown">0%</span></p>
+    <p>Average Win: <span id="average-win">0</span></p>
+    <p>Average Loss: <span id="average-loss">0</span></p>
+    <p>Profit Factor: <span id="profit-factor">0</span></p>
+    <p>Cumulative Balance: <span id="cumulative-balance">10000</span></p>
+  </div>
+
+  <!-- Trade Log Section -->
+  <div class="log-section">
+    <h2>Trade Log</h2>
+    <div class="trade-log">
+      <ul id="trade-log"></ul>
+    </div>
   </div>
 </div>
 
@@ -165,18 +224,23 @@
     const riskPercentage = parseFloat(document.getElementById("risk-percentage").value) / 100;
     const rr = parseFloat(document.getElementById("rr").value);
     const outcome = document.getElementById("win-loss").value;
-    const riskAmount = currentBalance * riskPercentage;
+    const slDistance = parseFloat(document.getElementById("sl-distance").value);
+    const pipValue = parseFloat(document.getElementById("pip-value").value) || 0;
+    const costPerLot = parseFloat(document.getElementById("cost-per-lot").value) || 0;
 
+    const riskAmount = currentBalance * riskPercentage;
+    let fee = (pipValue * slDistance * costPerLot) || 0;
     let realizedPL = 0;
+
     if (outcome === "Win") {
-      realizedPL = riskAmount * rr;
+      realizedPL = (riskAmount * rr) - fee;
       currentWinStreak++;
       currentLossStreak = 0;
       maxWinStreak = Math.max(maxWinStreak, currentWinStreak);
       wins++;
       totalWinAmount += realizedPL;
     } else {
-      realizedPL = -riskAmount * Math.abs(rr);
+      realizedPL = (-riskAmount * Math.abs(rr)) - fee;
       currentLossStreak++;
       currentWinStreak = 0;
       maxLossStreak = Math.max(maxLossStreak, currentLossStreak);
