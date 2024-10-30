@@ -97,6 +97,15 @@
       background-color: #c82333;
     }
 
+    .reset-button {
+      background-color: #007bff;
+      margin-top: 10px;
+    }
+
+    .reset-button:hover {
+      background-color: #0056b3;
+    }
+
     .summary, .log-section {
       background-color: #f8f9fa;
       padding: 20px;
@@ -205,7 +214,10 @@
     <p>Average Win: <span id="average-win">0</span></p>
     <p>Average Loss: <span id="average-loss">0</span></p>
     <p>Profit Factor: <span id="profit-factor">0</span></p>
+    <p>Total Fees Paid: <span id="total-fees">0</span></p>
+    <p>PnL After Fees: <span id="pnl-after-fees">0</span></p>
     <p>Cumulative Balance: <span id="cumulative-balance">10000</span></p>
+    <button class="reset-button" onclick="resetBacktest()">Reset Backtesting</button>
   </div>
 
   <!-- Trade Log Section -->
@@ -225,6 +237,7 @@
   let maxWinStreak = 0, maxLossStreak = 0, currentWinStreak = 0, currentLossStreak = 0;
   let maxDrawdown = 0, maxBalance = initialCapital;
   let totalWinAmount = 0, totalLossAmount = 0;
+  let totalFeesPaid = 0;
   let tradeHistory = [];
 
   function recordTrade(outcome) {
@@ -237,7 +250,9 @@
 
     const riskAmount = currentBalance * riskPercentage;
     const lotSize = riskAmount / (slDistance * pipValue);
-    const fee = lotSize * slDistance * costPerLot;
+    const fee = (riskAmount / (pipValue * slDistance));
+    totalFeesPaid += fee;
+    
     let realizedPL = 0;
 
     if (outcome === "Win") {
@@ -274,6 +289,7 @@
     const averageWin = wins ? (totalWinAmount / wins).toFixed(2) : 0;
     const averageLoss = losses ? (totalLossAmount / losses).toFixed(2) : 0;
     const profitFactor = totalLossAmount ? (totalWinAmount / totalLossAmount).toFixed(2) : 0;
+    const pnlAfterFees = currentBalance - initialCapital;
 
     document.getElementById("total-trades").innerText = totalTrades;
     document.getElementById("win-rate").innerText = winRate.toFixed(2) + "%";
@@ -283,6 +299,8 @@
     document.getElementById("average-win").innerText = averageWin;
     document.getElementById("average-loss").innerText = averageLoss;
     document.getElementById("profit-factor").innerText = profitFactor;
+    document.getElementById("total-fees").innerText = totalFeesPaid.toFixed(2);
+    document.getElementById("pnl-after-fees").innerText = pnlAfterFees.toFixed(2);
     document.getElementById("cumulative-balance").innerText = currentBalance.toFixed(2);
   }
 
@@ -312,7 +330,7 @@
   function resetBacktest() {
     initialCapital = parseFloat(document.getElementById("initial-capital").value);
     currentBalance = initialCapital;
-    totalTrades = wins = losses = maxWinStreak = maxLossStreak = currentWinStreak = currentLossStreak = totalWinAmount = totalLossAmount = 0;
+    totalTrades = wins = losses = maxWinStreak = maxLossStreak = currentWinStreak = currentLossStreak = totalWinAmount = totalLossAmount = totalFeesPaid = 0;
     maxDrawdown = 0;
     maxBalance = initialCapital;
     tradeHistory = [];
