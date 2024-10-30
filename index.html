@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Backtesting Tool</title>
   <style>
-    /* Reset and body styles */
+    /* Styling */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -28,7 +28,6 @@
       text-align: center;
       margin-bottom: 20px;
     }
-    /* Container and section styling */
     .container {
       max-width: 500px;
       width: 100%;
@@ -47,7 +46,6 @@
       margin-bottom: 6px;
       color: #555;
     }
-    /* Input and button styles */
     input[type="number"], input[type="date"] {
       width: 100%;
       padding: 12px;
@@ -134,7 +132,6 @@
     .export-button:hover {
       background-color: #2a9d4d;
     }
-    /* Summary and log section */
     .summary, .log-section {
       background-color: #f2f2f7;
       padding: 15px;
@@ -245,6 +242,12 @@
 </div>
 
 <script>
+  let initialCapital = parseFloat(document.getElementById("initial-capital").value);
+  let currentBalance = initialCapital;
+  let totalTrades = 0, wins = 0, losses = 0;
+  let winStreak = 0, lossStreak = 0, maxWinStreak = 0, maxLossStreak = 0;
+  let tradeLog = [];
+
   function adjustDate(increment) {
     const dateInput = document.getElementById("trade-date");
     let currentDate = new Date(dateInput.value || new Date());
@@ -252,7 +255,80 @@
     dateInput.value = currentDate.toISOString().split("T")[0];
   }
 
-  // Other JavaScript functions (recordTrade, updateSummary, etc.) remain the same.
+  function recordTrade(outcome) {
+    const rr = parseFloat(document.getElementById("rr").value);
+    const slDistance = parseFloat(document.getElementById("sl-distance").value);
+    const pipValue = parseFloat(document.getElementById("pip-value").value);
+    const riskPercentage = parseFloat(document.getElementById("risk-percentage").value) / 100;
+    const date = document.getElementById("trade-date").value;
+
+    if (isNaN(rr) || isNaN(slDistance) || isNaN(pipValue) || isNaN(riskPercentage)) {
+      alert("Please fill in all fields.");
+      return;
+    }
+
+    const riskAmount = currentBalance * riskPercentage;
+    const fee = riskAmount / (pipValue * slDistance);
+
+    let profitOrLoss = 0;
+    if (outcome === "Win") {
+      profitOrLoss = riskAmount * rr;
+      wins++;
+      winStreak++;
+      lossStreak = 0;
+    } else {
+      profitOrLoss = -riskAmount;
+      losses++;
+      lossStreak++;
+      winStreak = 0;
+    }
+
+    currentBalance += profitOrLoss - fee;
+    totalTrades++;
+    maxWinStreak = Math.max(maxWinStreak, winStreak);
+    maxLossStreak = Math.max(maxLossStreak, lossStreak);
+
+    tradeLog.push({ date, outcome, profitOrLoss: profitOrLoss.toFixed(2), balance: currentBalance.toFixed(2) });
+
+    updateSummary();
+    updateTradeLog();
+  }
+
+  function updateSummary() {
+    document.getElementById("total-trades").textContent = totalTrades;
+    document.getElementById("win-rate").textContent = ((wins / totalTrades) * 100).toFixed(2) + "%";
+    document.getElementById("max-win-streak").textContent = maxWinStreak;
+    document.getElementById("max-loss-streak").textContent = maxLossStreak;
+    document.getElementById("cumulative-balance").textContent = currentBalance.toFixed(2);
+    document.getElementById("total-fees").textContent = (initialCapital - currentBalance).toFixed(2);
+  }
+
+  function updateTradeLog() {
+    const tradeLogEl = document.getElementById("trade-log");
+    tradeLogEl.innerHTML = "";
+    tradeLog.forEach((trade) => {
+      const li = document.createElement("li");
+      li.textContent = `${trade.date} - ${trade.outcome}: ${trade.profitOrLoss} (Balance: ${trade.balance})`;
+      tradeLogEl.appendChild(li);
+    });
+  }
+
+  function resetBacktest() {
+    currentBalance = initialCapital;
+    totalTrades = wins = losses = winStreak = lossStreak = maxWinStreak = maxLossStreak = 0;
+    tradeLog = [];
+    updateSummary();
+    updateTradeLog();
+  }
+
+  function exportLog() {
+    const logText = tradeLog.map(trade => `${trade.date}, ${trade.outcome}, ${trade.profitOrLoss}, ${trade.balance}`).join("\n");
+    const blob = new Blob([logText], { type: "text/plain" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "trade-log.txt";
+    link.click();
+  }
 </script>
 
 </body>
