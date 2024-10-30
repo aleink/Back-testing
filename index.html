@@ -246,6 +246,9 @@
   let currentBalance = initialCapital;
   let totalTrades = 0, wins = 0, losses = 0;
   let winStreak = 0, lossStreak = 0, maxWinStreak = 0, maxLossStreak = 0;
+  let totalFees = 0, totalPnLAfterFees = 0;
+  let averageWin = 0, averageLoss = 0;
+  let profitFactor = 0;
   let tradeLog = [];
 
   function adjustDate(increment) {
@@ -268,7 +271,9 @@
     }
 
     const riskAmount = currentBalance * riskPercentage;
+    const lots = riskAmount / (pipValue * slDistance);
     const fee = riskAmount / (pipValue * slDistance);
+    totalFees += fee;
 
     let profitOrLoss = 0;
     if (outcome === "Win") {
@@ -283,12 +288,15 @@
       winStreak = 0;
     }
 
-    currentBalance += profitOrLoss - fee;
+    const finalPnL = profitOrLoss - fee;
+    currentBalance += finalPnL;
+    totalPnLAfterFees += finalPnL;
+
     totalTrades++;
     maxWinStreak = Math.max(maxWinStreak, winStreak);
     maxLossStreak = Math.max(maxLossStreak, lossStreak);
 
-    tradeLog.push({ date, outcome, profitOrLoss: profitOrLoss.toFixed(2), balance: currentBalance.toFixed(2) });
+    tradeLog.push({ date, riskAmount: riskAmount.toFixed(2), lots: lots.toFixed(2), rr, slDistance, profitOrLoss: profitOrLoss.toFixed(2), fee: fee.toFixed(2), finalPnL: finalPnL.toFixed(2), balance: currentBalance.toFixed(2) });
 
     updateSummary();
     updateTradeLog();
@@ -299,8 +307,12 @@
     document.getElementById("win-rate").textContent = ((wins / totalTrades) * 100).toFixed(2) + "%";
     document.getElementById("max-win-streak").textContent = maxWinStreak;
     document.getElementById("max-loss-streak").textContent = maxLossStreak;
+    document.getElementById("average-win").textContent = (totalPnLAfterFees / wins).toFixed(2);
+    document.getElementById("average-loss").textContent = (totalPnLAfterFees / losses).toFixed(2);
+    document.getElementById("profit-factor").textContent = ((averageWin * wins) / (averageLoss * losses)).toFixed(2);
+    document.getElementById("total-fees").textContent = totalFees.toFixed(2);
+    document.getElementById("pnl-after-fees").textContent = totalPnLAfterFees.toFixed(2);
     document.getElementById("cumulative-balance").textContent = currentBalance.toFixed(2);
-    document.getElementById("total-fees").textContent = (initialCapital - currentBalance).toFixed(2);
   }
 
   function updateTradeLog() {
@@ -308,21 +320,21 @@
     tradeLogEl.innerHTML = "";
     tradeLog.forEach((trade) => {
       const li = document.createElement("li");
-      li.textContent = `${trade.date} - ${trade.outcome}: ${trade.profitOrLoss} (Balance: ${trade.balance})`;
+      li.textContent = `${trade.date} - Risk: ${trade.riskAmount}, Lots: ${trade.lots}, RR: ${trade.rr}, SL: ${trade.slDistance} pips, PnL: ${trade.profitOrLoss}, Fees: ${trade.fee}, Final PnL: ${trade.finalPnL} (Balance: ${trade.balance})`;
       tradeLogEl.appendChild(li);
     });
   }
 
   function resetBacktest() {
     currentBalance = initialCapital;
-    totalTrades = wins = losses = winStreak = lossStreak = maxWinStreak = maxLossStreak = 0;
+    totalTrades = wins = losses = winStreak = lossStreak = maxWinStreak = maxLossStreak = totalFees = totalPnLAfterFees = averageWin = averageLoss = profitFactor = 0;
     tradeLog = [];
     updateSummary();
     updateTradeLog();
   }
 
   function exportLog() {
-    const logText = tradeLog.map(trade => `${trade.date}, ${trade.outcome}, ${trade.profitOrLoss}, ${trade.balance}`).join("\n");
+    const logText = tradeLog.map(trade => `${trade.date}, Risk: ${trade.riskAmount}, Lots: ${trade.lots}, RR: ${trade.rr}, SL: ${trade.slDistance} pips, PnL: ${trade.profitOrLoss}, Fees: ${trade.fee}, Final PnL: ${trade.finalPnL}, Balance: ${trade.balance}`).join("\n");
     const blob = new Blob([logText], { type: "text/plain" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
