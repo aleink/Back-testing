@@ -237,7 +237,7 @@
     <div class="trade-log">
       <ul id="trade-log"></ul>
     </div>
-    <button class="export-button" onclick="exportLog()">Export Results</button>
+    <button class="export-button" onclick="exportLog()">Export Results as CSV</button>
   </div>
 </div>
 
@@ -335,11 +335,14 @@
   }
 
   function exportLog() {
-    const logText = tradeLog.map(trade => `${trade.date}, Risk: ${trade.riskAmount}, Lots: ${trade.lots}, RR: ${trade.rr}, SL: ${trade.slDistance} pips, PnL: ${trade.profitOrLoss}, Fees: ${trade.fee}, Final PnL: ${trade.finalPnL}, Balance: ${trade.balance}`).join("\n");
-    const blob = new Blob([logText], { type: "text/plain" });
+    const headers = "Date,Risk Amount,Lots,RR,SL Distance (pips),PnL,Fees,Final PnL,Balance\n";
+    const csvContent = tradeLog.map(trade => 
+      `${trade.date},${trade.riskAmount},${trade.lots},${trade.rr},${trade.slDistance},${trade.profitOrLoss},${trade.fee},${trade.finalPnL},${trade.balance}`
+    ).join("\n");
+    const blob = new Blob([headers + csvContent], { type: "text/csv" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = "trade-log.txt";
+    link.download = "trade-log.csv";
     link.click();
   }
 </script>
