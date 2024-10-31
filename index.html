@@ -315,9 +315,8 @@
     maxWinStreak = Math.max(maxWinStreak, winStreak);
     maxLossStreak = Math.max(maxLossStreak, lossStreak);
 
-    if (currentBalance > peakBalance) {
-      peakBalance = currentBalance;
-    }
+    // Update peak balance and calculate max drawdown
+    peakBalance = Math.max(peakBalance, currentBalance);
     const drawdown = peakBalance - currentBalance;
     maxDrawdown = Math.max(maxDrawdown, drawdown);
 
