@@ -275,56 +275,56 @@
     dateInput.value = currentDate.toISOString().split("T")[0];
   }
 
-  function recordTrade(outcome) {
-    const rr = parseFloat(document.getElementById("rr").value);
-    const slDistance = parseFloat(document.getElementById("sl-distance").value);
-    const pipValue = parseFloat(document.getElementById("pip-value").value) || 1; // Default to 1 if 0
-    const riskPercentage = parseFloat(document.getElementById("risk-percentage").value) / 100;
-    const costPerLot = parseFloat(document.getElementById("cost-per-lot").value) || 0; // Default to 0 if 0
-    const date = document.getElementById("trade-date").value;
+ function recordTrade(outcome) {
+      const rr = parseFloat(document.getElementById("rr").value);
+      const slDistance = parseFloat(document.getElementById("sl-distance").value);
+      const pipValue = parseFloat(document.getElementById("pip-value").value) || 1; // Default to 1 if 0
+      const riskPercentage = parseFloat(document.getElementById("risk-percentage").value) / 100;
+      const costPerLot = parseFloat(document.getElementById("cost-per-lot").value) || 0; // Default to 0 if 0
+      const date = document.getElementById("trade-date").value;
 
-    if (isNaN(rr) || isNaN(slDistance) || isNaN(pipValue) || isNaN(riskPercentage) || isNaN(costPerLot)) {
-      alert("Please fill in all fields.");
-      return;
-    }
+      if (isNaN(rr) || isNaN(slDistance) || isNaN(pipValue) || isNaN(riskPercentage) || isNaN(costPerLot)) {
+        alert("Please fill in all fields.");
+        return;
+      }
 
-    const riskAmount = currentBalance * riskPercentage;
-    const lots = riskAmount / (pipValue * slDistance);
-    const fee = lots * costPerLot;
-    totalFees += fee;
+      const riskAmount = currentBalance * riskPercentage;
+      const lots = riskAmount / (pipValue * slDistance);
+      const fee = lots * costPerLot;
+      totalFees += fee;
 
-    let profitOrLoss = 0;
-    if (outcome === "Win") {
-      profitOrLoss = riskAmount * rr;
-      totalWinningPnL += profitOrLoss;
-      wins++;
-      winStreak++;
-      lossStreak = 0;
-    } else {
-      profitOrLoss = -riskAmount; // Ensure loss is subtracted correctly
-      totalLosingPnL += Math.abs(profitOrLoss);
-      losses++;
-      lossStreak++;
-      winStreak = 0;
-    }
+      let profitOrLoss = 0;
+      if (outcome === "Win") {
+        profitOrLoss = riskAmount * rr; // RR is used directly, including fractional values
+        totalWinningPnL += profitOrLoss;
+        wins++;
+        winStreak++;
+        lossStreak = 0;
+      } else {
+        profitOrLoss = -riskAmount * Math.abs(rr); // Use RR as a fractional value in losses as well
+        totalLosingPnL += Math.abs(profitOrLoss);
+        losses++;
+        lossStreak++;
+        winStreak = 0;
+      }
 
-    const finalPnL = profitOrLoss - fee;
-    currentBalance += finalPnL;
-    totalPnLAfterFees += finalPnL;
+      const finalPnL = profitOrLoss - fee;
+      currentBalance += finalPnL;
+      totalPnLAfterFees += finalPnL;
 
-    totalTrades++;
-    maxWinStreak = Math.max(maxWinStreak, winStreak);
-    maxLossStreak = Math.max(maxLossStreak, lossStreak);
+      totalTrades++;
+      maxWinStreak = Math.max(maxWinStreak, winStreak);
+      maxLossStreak = Math.max(maxLossStreak, lossStreak);
 
-    // Update peak balance and calculate max drawdown
-    peakBalance = Math.max(peakBalance, currentBalance);
-    const drawdown = peakBalance - currentBalance;
-    maxDrawdown = Math.max(maxDrawdown, drawdown);
+      // Update peak balance and calculate max drawdown
+      peakBalance = Math.max(peakBalance, currentBalance);
+      const drawdown = peakBalance - currentBalance;
+      maxDrawdown = Math.max(maxDrawdown, drawdown);
 
-    tradeLog.push({ date, riskAmount: riskAmount.toFixed(2), lots: lots.toFixed(2), rr, slDistance, profitOrLoss: profitOrLoss.toFixed(2), fee: fee.toFixed(2), finalPnL: finalPnL.toFixed(2), balance: currentBalance.toFixed(2) });
+      tradeLog.push({ date, riskAmount: riskAmount.toFixed(2), lots: lots.toFixed(2), rr, slDistance, profitOrLoss: profitOrLoss.toFixed(2), fee: fee.toFixed(2), finalPnL: finalPnL.toFixed(2), balance: currentBalance.toFixed(2) });
 
-    updateSummary();
-    updateTradeLog();
+      updateSummary();
+      updateTradeLog();
   }
 
   function goBack() {
