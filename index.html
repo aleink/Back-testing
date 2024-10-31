@@ -277,9 +277,9 @@
   function recordTrade(outcome) {
     const rr = parseFloat(document.getElementById("rr").value);
     const slDistance = parseFloat(document.getElementById("sl-distance").value);
-    const pipValue = parseFloat(document.getElementById("pip-value").value);
+    const pipValue = parseFloat(document.getElementById("pip-value").value) || 1; // Default to 1 if 0
     const riskPercentage = parseFloat(document.getElementById("risk-percentage").value) / 100;
-    const costPerLot = parseFloat(document.getElementById("cost-per-lot").value);
+    const costPerLot = parseFloat(document.getElementById("cost-per-lot").value) || 0; // Default to 0 if 0
     const date = document.getElementById("trade-date").value;
 
     if (isNaN(rr) || isNaN(slDistance) || isNaN(pipValue) || isNaN(riskPercentage) || isNaN(costPerLot)) {
