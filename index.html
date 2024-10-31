@@ -134,6 +134,7 @@
     }
     .back-button {
       background-color: #ff9500;
+      margin-top: 10px;
     }
     .back-button:hover {
       background-color: #cc7a00;
@@ -219,6 +220,7 @@
       <button class="win-button" onclick="recordTrade('Win')">Record Win</button>
       <button class="loss-button" onclick="recordTrade('Loss')">Record Loss</button>
     </div>
+    <button class="back-button" onclick="goBack()">Go Back (Remove Last Trade)</button>
   </div>
 
   <!-- Summary Section -->
@@ -236,7 +238,6 @@
     <p>PnL After Fees: <span id="pnl-after-fees">0</span></p>
     <p>Cumulative Balance: <span id="cumulative-balance">10000</span></p>
     <button class="reset-button" onclick="resetBacktest()">Reset Backtesting</button>
-    <button class="back-button" onclick="goBack()">Go Back (Remove Last Trade)</button>
   </div>
 
   <!-- Trade Log Section -->
