@@ -108,7 +108,7 @@
     .loss-button:hover {
       background-color: #d12a21;
     }
-    .reset-button, .export-button {
+    .reset-button, .export-button, .back-button {
       width: 100%;
       padding: 12px;
       font-size: 16px;
@@ -131,6 +131,12 @@
     }
     .export-button:hover {
       background-color: #2a9d4d;
+    }
+    .back-button {
+      background-color: #ff9500;
+    }
+    .back-button:hover {
+      background-color: #cc7a00;
     }
     .summary, .log-section {
       background-color: #f2f2f7;
@@ -230,6 +236,7 @@
     <p>PnL After Fees: <span id="pnl-after-fees">0</span></p>
     <p>Cumulative Balance: <span id="cumulative-balance">10000</span></p>
     <button class="reset-button" onclick="resetBacktest()">Reset Backtesting</button>
+    <button class="back-button" onclick="goBack()">Go Back (Remove Last Trade)</button>
   </div>
 
   <!-- Trade Log Section -->
@@ -315,6 +322,32 @@
 
     tradeLog.push({ date, riskAmount: riskAmount.toFixed(2), lots: lots.toFixed(2), rr, slDistance, profitOrLoss: profitOrLoss.toFixed(2), fee: fee.toFixed(2), finalPnL: finalPnL.toFixed(2), balance: currentBalance.toFixed(2) });
 
+    updateSummary();
+    updateTradeLog();
+  }
+
+  function goBack() {
+    if (tradeLog.length === 0) {
+      alert("No trades to remove.");
+      return;
+    }
+
+    const lastTrade = tradeLog.pop();
+    currentBalance -= parseFloat(lastTrade.finalPnL);
+    totalPnLAfterFees -= parseFloat(lastTrade.finalPnL);
+    totalFees -= parseFloat(lastTrade.fee);
+
+    if (lastTrade.profitOrLoss > 0) {
+      wins--;
+      totalWinningPnL -= parseFloat(lastTrade.profitOrLoss);
+      winStreak--;
+    } else {
+      losses--;
+      totalLosingPnL -= Math.abs(parseFloat(lastTrade.profitOrLoss));
+      lossStreak--;
+    }
+
+    totalTrades--;
     updateSummary();
     updateTradeLog();
   }
