@@ -300,7 +300,7 @@
       winStreak++;
       lossStreak = 0;
     } else {
-      profitOrLoss = -riskAmount;
+      profitOrLoss = -riskAmount; // Ensure loss is subtracted correctly
       totalLosingPnL += Math.abs(profitOrLoss);
       losses++;
       lossStreak++;
