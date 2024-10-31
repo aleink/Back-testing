@@ -235,8 +235,6 @@
     <p>Average Win: <span id="average-win">0</span></p>
     <p>Average Loss: <span id="average-loss">0</span></p>
     <p>Profit Factor: <span id="profit-factor">0</span></p>
-    <p>Total Rs Achieved: <span id="total-rs-achieved">0</span></p>
-    <p>Date Range: <span id="date-range">N/A</span></p>
     <p>Total Fees Paid: <span id="total-fees">0</span></p>
     <p>PnL After Fees: <span id="pnl-after-fees">0</span></p>
     <p>Cumulative Balance: <span id="cumulative-balance">10000</span></p>
@@ -261,10 +259,7 @@
   let totalFees = 0, totalPnLAfterFees = 0;
   let maxDrawdown = 0, peakBalance = initialCapital;
   let totalWinningPnL = 0, totalLosingPnL = 0;
-  let totalRsAchieved = 0; // Total Rs achieved
   let tradeLog = [];
-  let startDate = ""; // Starting date of performance
-  let endDate = ""; // Ending date of performance
 
   function updateInitialCapital() {
     initialCapital = parseFloat(document.getElementById("initial-capital").value);
@@ -280,61 +275,56 @@
     dateInput.value = currentDate.toISOString().split("T")[0];
   }
 
-  function recordTrade(outcome) {
-    const rr = parseFloat(document.getElementById("rr").value);
-    const slDistance = parseFloat(document.getElementById("sl-distance").value);
-    const pipValue = parseFloat(document.getElementById("pip-value").value) || 1;
-    const riskPercentage = parseFloat(document.getElementById("risk-percentage").value) / 100;
-    const costPerLot = parseFloat(document.getElementById("cost-per-lot").value) || 0;
-    const date = document.getElementById("trade-date").value;
+ function recordTrade(outcome) {
+      const rr = parseFloat(document.getElementById("rr").value);
+      const slDistance = parseFloat(document.getElementById("sl-distance").value);
+      const pipValue = parseFloat(document.getElementById("pip-value").value) || 1; // Default to 1 if 0
+      const riskPercentage = parseFloat(document.getElementById("risk-percentage").value) / 100;
+      const costPerLot = parseFloat(document.getElementById("cost-per-lot").value) || 0; // Default to 0 if 0
+      const date = document.getElementById("trade-date").value;
 
-    if (isNaN(rr) || isNaN(slDistance) || isNaN(pipValue) || isNaN(riskPercentage) || isNaN(costPerLot)) {
-      alert("Please fill in all fields.");
-      return;
-    }
+      if (isNaN(rr) || isNaN(slDistance) || isNaN(pipValue) || isNaN(riskPercentage) || isNaN(costPerLot)) {
+        alert("Please fill in all fields.");
+        return;
+      }
 
-    const riskAmount = currentBalance * riskPercentage;
-    const lots = riskAmount / (pipValue * slDistance);
-    const fee = lots * costPerLot;
-    totalFees += fee;
+      const riskAmount = currentBalance * riskPercentage;
+      const lots = riskAmount / (pipValue * slDistance);
+      const fee = lots * costPerLot;
+      totalFees += fee;
 
-    let profitOrLoss = 0;
-    if (outcome === "Win") {
-      profitOrLoss = riskAmount * rr;
-      totalWinningPnL += profitOrLoss;
-      wins++;
-      winStreak++;
-      lossStreak = 0;
-      totalRsAchieved += rr;
-    } else {
-      profitOrLoss = -riskAmount * Math.abs(rr);
-      totalLosingPnL += Math.abs(profitOrLoss);
-      losses++;
-      lossStreak++;
-      winStreak = 0;
-      totalRsAchieved -= Math.abs(rr);
-    }
+      let profitOrLoss = 0;
+      if (outcome === "Win") {
+        profitOrLoss = riskAmount * rr; // RR is used directly, including fractional values
+        totalWinningPnL += profitOrLoss;
+        wins++;
+        winStreak++;
+        lossStreak = 0;
+      } else {
+        profitOrLoss = -riskAmount * Math.abs(rr); // Use RR as a fractional value in losses as well
+        totalLosingPnL += Math.abs(profitOrLoss);
+        losses++;
+        lossStreak++;
+        winStreak = 0;
+      }
 
-    const finalPnL = profitOrLoss - fee;
-    currentBalance += finalPnL;
-    totalPnLAfterFees += finalPnL;
+      const finalPnL = profitOrLoss - fee;
+      currentBalance += finalPnL;
+      totalPnLAfterFees += finalPnL;
 
-    totalTrades++;
-    maxWinStreak = Math.max(maxWinStreak, winStreak);
-    maxLossStreak = Math.max(maxLossStreak, lossStreak);
+      totalTrades++;
+      maxWinStreak = Math.max(maxWinStreak, winStreak);
+      maxLossStreak = Math.max(maxLossStreak, lossStreak);
 
-    peakBalance = Math.max(peakBalance, currentBalance);
-    const drawdown = peakBalance - currentBalance;
-    maxDrawdown = Math.max(maxDrawdown, drawdown);
+      // Update peak balance and calculate max drawdown
+      peakBalance = Math.max(peakBalance, currentBalance);
+      const drawdown = peakBalance - currentBalance;
+      maxDrawdown = Math.max(maxDrawdown, drawdown);
 
-    if (totalTrades === 1) startDate = date;
-    endDate = date;
+      tradeLog.push({ date, riskAmount: riskAmount.toFixed(2), lots: lots.toFixed(2), rr, slDistance, profitOrLoss: profitOrLoss.toFixed(2), fee: fee.toFixed(2), finalPnL: finalPnL.toFixed(2), balance: currentBalance.toFixed(2) });
 
-    const rrDisplay = outcome === "Win" ? rr.toFixed(2) : (-Math.abs(rr)).toFixed(2);
-    tradeLog.push({ date, riskAmount: riskAmount.toFixed(2), lots: lots.toFixed(2), rr: rrDisplay, slDistance, profitOrLoss: profitOrLoss.toFixed(2), fee: fee.toFixed(2), finalPnL: finalPnL.toFixed(2), balance: currentBalance.toFixed(2) });
-
-    updateSummary();
-    updateTradeLog();
+      updateSummary();
+      updateTradeLog();
   }
 
   function goBack() {
@@ -348,17 +338,14 @@
     totalPnLAfterFees -= parseFloat(lastTrade.finalPnL);
     totalFees -= parseFloat(lastTrade.fee);
 
-    const rrValue = parseFloat(lastTrade.rr);
-    if (rrValue > 0) {
+    if (lastTrade.profitOrLoss > 0) {
       wins--;
       totalWinningPnL -= parseFloat(lastTrade.profitOrLoss);
       winStreak--;
-      totalRsAchieved -= rrValue;
     } else {
       losses--;
       totalLosingPnL -= Math.abs(parseFloat(lastTrade.profitOrLoss));
       lossStreak--;
-      totalRsAchieved += Math.abs(rrValue);
     }
 
     totalTrades--;
@@ -378,8 +365,6 @@
     document.getElementById("total-fees").textContent = totalFees.toFixed(2);
     document.getElementById("pnl-after-fees").textContent = totalPnLAfterFees.toFixed(2);
     document.getElementById("cumulative-balance").textContent = currentBalance.toFixed(2);
-    document.getElementById("total-rs-achieved").textContent = totalRsAchieved.toFixed(2);
-    document.getElementById("date-range").textContent = `${startDate} to ${endDate}`;
   }
 
   function updateTradeLog() {
@@ -394,11 +379,9 @@
 
   function resetBacktest() {
     currentBalance = initialCapital;
-    totalTrades = wins = losses = winStreak = lossStreak = maxWinStreak = maxLossStreak = totalFees = totalPnLAfterFees = totalWinningPnL = totalLosingPnL = maxDrawdown = totalRsAchieved = 0;
+    totalTrades = wins = losses = winStreak = lossStreak = maxWinStreak = maxLossStreak = totalFees = totalPnLAfterFees = totalWinningPnL = totalLosingPnL = maxDrawdown = 0;
     peakBalance = initialCapital;
     tradeLog = [];
-    startDate = "";
-    endDate = "";
     updateSummary();
     updateTradeLog();
   }
