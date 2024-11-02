@@ -268,13 +268,14 @@
   let totalFees = 0, totalPnLAfterFees = 0;
   let maxDrawdown = 0, peakBalance = initialCapital;
   let totalWinningPnL = 0, totalLosingPnL = 0;
-  let totalRsAchieved = 0; // Total Rs achieved
-  let tradeLog = [];
-  let startDate = ""; // Starting date of performance
-  let endDate = ""; // Ending date of performance
-  let lastTradeDate = ""; // Track the date of the last trade
-  let riskType = document.getElementById("risk-type").value; // Default risk type based on selection
-  let dailyRiskAmount = 0; // Track daily risk for "fixed-daily"
+  let totalRsAchieved = 0;
+  let tradeLog = []; // Visible log for the user
+  let rawTradeLog = []; // Hidden log with raw data for recalculations
+  let startDate = ""; 
+  let endDate = ""; 
+  let lastTradeDate = ""; 
+  let riskType = document.getElementById("risk-type").value;
+  let dailyRiskAmount = 0;
 
   // Event listeners for updating settings
   document.getElementById("risk-type").addEventListener("change", () => {
@@ -306,24 +307,24 @@
   }
 
   function recalculateAllTrades() {
-    // Reset variables to recalculate trades
+    // Reset variables for recalculations
     currentBalance = initialCapital;
     totalTrades = wins = losses = winStreak = lossStreak = maxWinStreak = maxLossStreak = totalFees = totalPnLAfterFees = totalWinningPnL = totalLosingPnL = maxDrawdown = totalRsAchieved = 0;
     peakBalance = initialCapital;
     dailyRiskAmount = 0;
-    lastTradeDate = ""; // Reset date tracking for "fixed-daily"
-    
-    // Clear and recalculate all trades
-    tradeLog.forEach(trade => recordTrade(trade.outcome, true, trade.date)); // Recalculate all trades without recording them in the log
+    tradeLog = []; // Clear visible log
+    lastTradeDate = ""; 
 
-    // Update both the summary and the trade log
+    // Recalculate each trade in rawTradeLog
+    rawTradeLog.forEach(rawTrade => recordTrade(rawTrade.outcome, true, rawTrade.date, rawTrade.rr, rawTrade.slDistance));
+
     updateSummary();
     updateTradeLog();
   }
 
-  function recordTrade(outcome, recalculating = false, tradeDate = "") {
-    const rr = parseFloat(document.getElementById("rr").value);
-    const slDistance = parseFloat(document.getElementById("sl-distance").value);
+  function recordTrade(outcome, recalculating = false, tradeDate = "", rr = 0, slDistance = 0) {
+    rr = recalculating ? rr : parseFloat(document.getElementById("rr").value);
+    slDistance = recalculating ? slDistance : parseFloat(document.getElementById("sl-distance").value);
     const pipValue = parseFloat(document.getElementById("pip-value").value) || 1;
     const riskAmount = parseFloat(document.getElementById("risk-amount").value);
     const costPerLot = parseFloat(document.getElementById("cost-per-lot").value) || 0;
@@ -334,20 +335,16 @@
       return;
     }
 
-    // Determine risk based on the selected type
     let tradeRisk;
     if (riskType === "fixed-daily") {
-      // Use the same risk amount for all trades on the same day
       if (lastTradeDate !== date) {
         dailyRiskAmount = currentBalance * (riskAmount / 100);
         lastTradeDate = date;
       }
       tradeRisk = dailyRiskAmount;
     } else if (riskType === "compounding") {
-      // Calculate new risk for each trade based on current balance
       tradeRisk = currentBalance * (riskAmount / 100);
     } else {
-      // Fixed dollar amount risk
       tradeRisk = riskAmount;
     }
     const lots = tradeRisk / (pipValue * slDistance);
@@ -384,6 +381,7 @@
     maxDrawdown = Math.max(maxDrawdown, drawdown);
 
     if (!recalculating) {
+      rawTradeLog.push({ date, outcome, rr, slDistance }); // Store raw trade data
       const rrDisplay = outcome === "Win" ? rr.toFixed(2) : (-Math.abs(rr)).toFixed(2);
       tradeLog.push({ date, outcome, riskAmount: tradeRisk.toFixed(2), lots: lots.toFixed(2), rr: rrDisplay, slDistance, profitOrLoss: profitOrLoss.toFixed(2), fee: fee.toFixed(2), finalPnL: finalPnL.toFixed(2), balance: currentBalance.toFixed(2) });
       updateTradeLog();
@@ -399,6 +397,7 @@
       return;
     }
 
+    rawTradeLog.pop(); // Remove from raw log as well
     const lastTrade = tradeLog.pop();
     currentBalance -= parseFloat(lastTrade.finalPnL);
     totalPnLAfterFees -= parseFloat(lastTrade.finalPnL);
@@ -453,6 +452,7 @@
     totalTrades = wins = losses = winStreak = lossStreak = maxWinStreak = maxLossStreak = totalFees = totalPnLAfterFees = totalWinningPnL = totalLosingPnL = maxDrawdown = totalRsAchieved = 0;
     peakBalance = initialCapital;
     tradeLog = [];
+    rawTradeLog = []; // Reset raw log
     startDate = "";
     endDate = "";
     updateSummary();
@@ -470,7 +470,6 @@
     link.download = "trade-log.csv";
     link.click();
   }
-
 </script>
 
 </body>
