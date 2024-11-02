@@ -261,7 +261,7 @@
 </div>
 
 <script>
-  // All global variables
+  <script>
   let initialCapital = parseFloat(document.getElementById("initial-capital").value);
   let currentBalance = initialCapital;
   let totalTrades = 0, wins = 0, losses = 0;
@@ -295,17 +295,17 @@
     currentBalance = initialCapital;
     totalTrades = wins = losses = winStreak = lossStreak = maxWinStreak = maxLossStreak = totalFees = totalPnLAfterFees = totalWinningPnL = totalLosingPnL = maxDrawdown = totalRsAchieved = 0;
     peakBalance = initialCapital;
-    tradeLog.forEach(trade => recordTrade(trade.outcome, true)); // Recalculate all trades without recording them in the log
+    tradeLog.forEach(trade => recordTrade(trade.outcome, true, trade.date)); // Recalculate all trades without recording them in the log
     updateSummary();
   }
 
-  function recordTrade(outcome, recalculating = false) {
+  function recordTrade(outcome, recalculating = false, tradeDate = "") {
     const rr = parseFloat(document.getElementById("rr").value);
     const slDistance = parseFloat(document.getElementById("sl-distance").value);
     const pipValue = parseFloat(document.getElementById("pip-value").value) || 1;
     const riskAmount = parseFloat(document.getElementById("risk-amount").value);
     const costPerLot = parseFloat(document.getElementById("cost-per-lot").value) || 0;
-    const date = document.getElementById("trade-date").value;
+    const date = tradeDate || document.getElementById("trade-date").value;
 
     if (!recalculating && (isNaN(rr) || isNaN(slDistance) || isNaN(pipValue) || isNaN(riskAmount) || isNaN(costPerLot))) {
       alert("Please fill in all fields.");
@@ -316,6 +316,7 @@
     let tradeRisk;
     if (riskType === "fixed-daily") {
       if (lastTradeDate !== date) tradeRisk = currentBalance * (riskAmount / 100);
+      else tradeRisk = currentBalance * (riskAmount / 100);
     } else if (riskType === "compounding") {
       tradeRisk = currentBalance * (riskAmount / 100);
     } else {
@@ -355,30 +356,64 @@
     maxDrawdown = Math.max(maxDrawdown, drawdown);
 
     if (!recalculating) {
-      tradeLog.push({ date, outcome, riskAmount: tradeRisk.toFixed(2), lots: lots.toFixed(2), rr: outcome === "Win" ? rr : -Math.abs(rr), slDistance, profitOrLoss: profitOrLoss.toFixed(2), fee: fee.toFixed(2), finalPnL: finalPnL.toFixed(2), balance: currentBalance.toFixed(2) });
+      const rrDisplay = outcome === "Win" ? rr.toFixed(2) : (-Math.abs(rr)).toFixed(2);
+      tradeLog.push({ date, outcome, riskAmount: tradeRisk.toFixed(2), lots: lots.toFixed(2), rr: rrDisplay, slDistance, profitOrLoss: profitOrLoss.toFixed(2), fee: fee.toFixed(2), finalPnL: finalPnL.toFixed(2), balance: currentBalance.toFixed(2) });
       updateTradeLog();
     }
+    if (totalTrades === 1) startDate = date;
+    endDate = date;
+    updateSummary();
+  }
+
+  function goBack() {
+    if (tradeLog.length === 0) {
+      alert("No trades to remove.");
+      return;
+    }
+
+    const lastTrade = tradeLog.pop();
+    currentBalance -= parseFloat(lastTrade.finalPnL);
+    totalPnLAfterFees -= parseFloat(lastTrade.finalPnL);
+    totalFees -= parseFloat(lastTrade.fee);
+
+    const rrValue = parseFloat(lastTrade.rr);
+    if (rrValue > 0) {
+      wins--;
+      totalWinningPnL -= parseFloat(lastTrade.profitOrLoss);
+      winStreak--;
+      totalRsAchieved -= rrValue;
+    } else {
+      losses--;
+      totalLosingPnL -= Math.abs(parseFloat(lastTrade.profitOrLoss));
+      lossStreak--;
+      totalRsAchieved += Math.abs(rrValue);
+    }
+
+    totalTrades--;
+    updateSummary();
+    updateTradeLog();
   }
 
   function updateSummary() {
     document.getElementById("total-trades").textContent = totalTrades;
-    document.getElementById("win-rate").textContent = ((wins / totalTrades) * 100).toFixed(2) + "%";
+    document.getElementById("win-rate").textContent = totalTrades > 0 ? ((wins / totalTrades) * 100).toFixed(2) + "%" : "0%";
     document.getElementById("max-win-streak").textContent = maxWinStreak;
     document.getElementById("max-loss-streak").textContent = maxLossStreak;
     document.getElementById("max-drawdown").textContent = `${((maxDrawdown / peakBalance) * 100).toFixed(2)}% / $${maxDrawdown.toFixed(2)}`;
-    document.getElementById("average-win").textContent = (totalWinningPnL / wins).toFixed(2);
-    document.getElementById("average-loss").textContent = (totalLosingPnL / losses).toFixed(2);
-    document.getElementById("profit-factor").textContent = (totalWinningPnL / totalLosingPnL).toFixed(2);
+    document.getElementById("average-win").textContent = wins > 0 ? (totalWinningPnL / wins).toFixed(2) : "0";
+    document.getElementById("average-loss").textContent = losses > 0 ? (totalLosingPnL / losses).toFixed(2) : "0";
+    document.getElementById("profit-factor").textContent = totalLosingPnL > 0 ? (totalWinningPnL / totalLosingPnL).toFixed(2) : "0";
     document.getElementById("total-fees").textContent = totalFees.toFixed(2);
     document.getElementById("pnl-after-fees").textContent = totalPnLAfterFees.toFixed(2);
     document.getElementById("cumulative-balance").textContent = currentBalance.toFixed(2);
     document.getElementById("total-rs-achieved").textContent = totalRsAchieved.toFixed(2);
+    document.getElementById("date-range").textContent = `${startDate} to ${endDate}`;
   }
 
   function updateTradeLog() {
     const tradeLogEl = document.getElementById("trade-log");
     tradeLogEl.innerHTML = "";
-    tradeLog.forEach(trade => {
+    tradeLog.forEach((trade) => {
       const li = document.createElement("li");
       li.textContent = `${trade.date} - Risk: ${trade.riskAmount}, Lots: ${trade.lots}, RR: ${trade.rr}, SL: ${trade.slDistance} pips, PnL: ${trade.profitOrLoss}, Fees: ${trade.fee}, Final PnL: ${trade.finalPnL} (Balance: ${trade.balance})`;
       tradeLogEl.appendChild(li);
@@ -390,6 +425,8 @@
     totalTrades = wins = losses = winStreak = lossStreak = maxWinStreak = maxLossStreak = totalFees = totalPnLAfterFees = totalWinningPnL = totalLosingPnL = maxDrawdown = totalRsAchieved = 0;
     peakBalance = initialCapital;
     tradeLog = [];
+    startDate = "";
+    endDate = "";
     updateSummary();
     updateTradeLog();
   }
@@ -405,6 +442,13 @@
     link.download = "trade-log.csv";
     link.click();
   }
+
+  // Event listener for risk type change to recalculate all trades
+  document.getElementById("risk-type").addEventListener("change", (e) => {
+    riskType = e.target.value;
+    recalculateAllTrades();
+  });
+</script>
 </script>
 
 </body>
