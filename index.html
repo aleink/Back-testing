@@ -475,7 +475,26 @@
     link.download = "trade-log.csv";
     link.click();
   }
+
+  function showRiskInfo() {
+  document.getElementById("riskInfoModal").style.display = "flex";
+}
+
+function closeRiskInfo() {
+  document.getElementById("riskInfoModal").style.display = "none";
+}
 </script>
 
+  <!-- Modal for Risk Type Info -->
+<div id="riskInfoModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); justify-content: center; align-items: center;">
+  <div style="background-color: white; padding: 20px; border-radius: 10px; max-width: 400px; width: 90%; text-align: center;">
+    <h3>Risk Type Explanation</h3>
+    <p><strong>Daily Fixed Percentage Risk:</strong> Calculates the risk amount based on a percentage of the initial balance at the start of each day. This amount is applied to all trades on the same day.</p>
+    <p><strong>Compounding Risk (Per Trade):</strong> Calculates the risk amount based on a percentage of the current balance after each trade. This allows the risk to grow or shrink dynamically with each trade.</p>
+    <p><strong>Fixed Dollar Amount:</strong> Uses a set dollar amount for risk on each trade, regardless of balance changes.</p>
+    <button onclick="closeRiskInfo()" style="margin-top: 15px; padding: 10px 20px; background-color: #007aff; color: white; border: none; border-radius: 5px; cursor: pointer;">Close</button>
+  </div>
+</div>
+  
 </body>
 </html>
