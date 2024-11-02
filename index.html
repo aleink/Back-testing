@@ -6,7 +6,7 @@
   <title>TradeTrack Pro</title>
   <link rel="icon" href="favicon.ico" type="image/x-icon">
   <style>
-    /* Styling */
+   /* Base styling */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -14,29 +14,27 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     }
     body {
-      background-color: #fefefe;
       padding: 20px;
       display: flex;
       justify-content: center;
       align-items: center;
       flex-direction: column;
-      color: #333;
+      transition: background-color 0.3s, color 0.3s;
     }
     h1 {
       font-size: 24px;
       font-weight: 600;
-      color: #333;
       text-align: center;
       margin-bottom: 20px;
     }
     .container {
       max-width: 500px;
       width: 100%;
-      background-color: #fff;
       border-radius: 15px;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
       padding: 20px;
       margin-top: 20px;
+      transition: background-color 0.3s;
     }
     .section {
       margin-bottom: 20px;
@@ -45,41 +43,21 @@
       display: block;
       font-weight: 500;
       margin-bottom: 6px;
-      color: #555;
+      transition: color 0.3s;
     }
     input[type="number"], input[type="date"], select {
       width: 100%;
       padding: 12px;
       font-size: 16px;
       margin-bottom: 10px;
-      border: 1px solid #ddd;
       border-radius: 8px;
-      background-color: #f9f9f9;
-      transition: border-color 0.3s ease;
-    }
-    input[type="number"]:focus, input[type="date"]:focus, select:focus {
-      border-color: #007aff;
-      outline: none;
+      transition: background-color 0.3s, color 0.3s;
     }
     .date-group {
       display: flex;
       align-items: center;
       gap: 10px;
       margin-top: 10px;
-    }
-    .date-button {
-      background-color: #007aff;
-      color: #fff;
-      font-size: 20px;
-      width: 40px;
-      height: 40px;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-    .date-button:hover {
-      background-color: #005bb5;
     }
     .button-group {
       display: flex;
@@ -91,101 +69,83 @@
       padding: 12px;
       font-size: 16px;
       font-weight: 500;
-      border: none;
       border-radius: 8px;
       cursor: pointer;
-      transition: background-color 0.3s ease;
-      color: #fff;
-    }
-    .win-button {
-      background-color: #34c759;
-    }
-    .win-button:hover {
-      background-color: #2a9d4d;
-    }
-    .loss-button {
-      background-color: #ff3b30;
-    }
-    .loss-button:hover {
-      background-color: #d12a21;
-    }
-    .reset-button, .export-button, .back-button {
-      width: 100%;
-      padding: 12px;
-      font-size: 16px;
-      font-weight: 500;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      margin-top: 15px;
-      transition: background-color 0.3s ease;
-    }
-    .reset-button {
-      background-color: #007aff;
-    }
-    .reset-button:hover {
-      background-color: #005bb5;
-    }
-    .export-button {
-      background-color: #34c759;
-    }
-    .export-button:hover {
-      background-color: #2a9d4d;
-    }
-    .back-button {
-      background-color: #ff9500;
-      margin-top: 10px;
-    }
-    .back-button:hover {
-      background-color: #cc7a00;
+      transition: background-color 0.3s;
     }
     .summary, .log-section {
-      background-color: #f2f2f7;
       padding: 15px;
       border-radius: 10px;
       margin-top: 20px;
-    }
-    .summary h2, .log-section h2 {
-      font-size: 18px;
-      color: #333;
-      margin-bottom: 10px;
-      font-weight: 500;
+      transition: background-color 0.3s, color 0.3s;
     }
     .summary p, .log-section p {
       font-size: 16px;
-      color: #666;
       margin: 8px 0;
     }
     .trade-log {
       max-height: 200px;
       overflow-y: auto;
       margin-top: 10px;
-      border-top: 1px solid #ddd;
       padding-top: 10px;
     }
-    .trade-log ul {
-      list-style-type: none;
-      padding: 0;
+    /* Dark Mode */
+    body.dark-mode {
+      background-color: #1a1a1a;
+      color: #f5f5f5;
     }
-    .trade-log li {
-      padding: 8px;
-      border-bottom: 1px solid #ddd;
-      font-size: 14px;
+    .container.dark-mode, .summary.dark-mode, .log-section.dark-mode {
+      background-color: #333;
+    }
+    input[type="number"].dark-mode, input[type="date"].dark-mode, select.dark-mode {
+      background-color: #444;
+      color: #fff;
+    }
+    label.dark-mode {
+      color: #ccc;
+    }
+    .button-group button.dark-mode, .date-button.dark-mode {
+      background-color: #666;
+    }
+    /* Light Mode */
+    body.light-mode {
+      background-color: #fefefe;
       color: #333;
     }
-    .trade-log li:last-child {
-      border-bottom: none;
+    .container.light-mode, .summary.light-mode, .log-section.light-mode {
+      background-color: #fff;
+    }
+    input[type="number"].light-mode, input[type="date"].light-mode, select.light-mode {
+      background-color: #f9f9f9;
+      color: #333;
+    }
+    label.light-mode {
+      color: #555;
+    }
+    .button-group button.light-mode, .date-button.light-mode {
+      background-color: #007aff;
+    }
+    /* Toggle button */
+    .toggle-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      cursor: pointer;
+      font-size: 18px;
     }
   </style>
 </head>
 <body>
 
 
-<!-- Header Container -->
-<div style="width: 100%; max-width: 500px; background-color: black; padding: 15px; text-align: center; border-radius: 10px; margin-bottom: 20px;">
-  <h1 style="color: white; font-size: 24px; font-weight: bold; margin: 0;">TradeTrack Pro</h1>
-</div>
+  <!-- Header and Toggle Button -->
+  <div style="width: 100%; max-width: 500px; background-color: black; padding: 15px; text-align: center; border-radius: 10px; margin-bottom: 20px;">
+    <h1 style="color: white; font-size: 24px; font-weight: bold; margin: 0;">TradeTrack Pro</h1>
+  </div>
+  
+  <div class="toggle-container" onclick="toggleDarkMode()">
+    <span class="toggle-icon">🌙</span>
+  </div>
 
 <div class="container">
   <!-- General Settings -->
@@ -486,6 +446,18 @@
 function closeRiskInfo() {
   document.getElementById("riskInfoModal").style.display = "none";
 }
+
+    function toggleDarkMode() {
+    document.body.classList.toggle('dark-mode');
+    document.body.classList.toggle('light-mode');
+    
+    const toggleIcon = document.querySelector('.toggle-icon');
+    if (document.body.classList.contains('dark-mode')) {
+      toggleIcon.textContent = '☀️'; // Switch icon to sun for light mode
+    } else {
+      toggleIcon.textContent = '🌙'; // Switch icon to moon for dark mode
+    }
+  }
 </script>
 
   <!-- Modal for Risk Type Info -->
