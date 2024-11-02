@@ -181,6 +181,7 @@
 </head>
 <body>
 
+
 <!-- Header Container -->
 <div style="width: 100%; max-width: 500px; background-color: black; padding: 15px; text-align: center; border-radius: 10px; margin-bottom: 20px;">
   <h1 style="color: white; font-size: 24px; font-weight: bold; margin: 0;">TradeTrack Pro</h1>
@@ -194,8 +195,8 @@
     <input type="number" id="initial-capital" placeholder="Enter initial capital" value="10000" onchange="updateInitialCapital()">
 
     <label for="risk-type">Risk Type:
-      <span style="cursor: pointer; color: #007aff; font-weight: bold;" onclick="showRiskInfo()">ℹ️</span>
-    </label>
+  <span style="cursor: pointer; color: #007aff; font-weight: bold;" onclick="showRiskInfo()">ℹ️</span>
+</label>
     <select id="risk-type" onchange="recalculateAllTrades()">
       <option value="fixed-daily">Daily Fixed Percentage Risk</option>
       <option value="compounding">Compounding Risk (Per Trade)</option>
@@ -244,9 +245,7 @@
     <p>Max Win Streak: <span id="max-win-streak">0</span></p>
     <p>Max Loss Streak: <span id="max-loss-streak">0</span></p>
     <p>Max Drawdown: <span id="max-drawdown">0% / $0</span></p>
-    <p>Average Win: <span id="average-win">0</span></
-
-p>
+    <p>Average Win: <span id="average-win">0</span></p>
     <p>Average Loss: <span id="average-loss">0</span></p>
     <p>Profit Factor: <span id="profit-factor">0</span></p>
     <p>Total Rs Achieved: <span id="total-rs-achieved">0</span></p>
@@ -269,218 +268,218 @@ p>
 
 <script>
   let initialCapital = parseFloat(document.getElementById("initial-capital").value);
-let currentBalance = initialCapital;
-let totalTrades = 0, wins = 0, losses = 0;
-let winStreak = 0, lossStreak = 0, maxWinStreak = 0, maxLossStreak = 0;
-let totalFees = 0, totalPnLAfterFees = 0;
-let maxDrawdown = 0, peakBalance = initialCapital;
-let totalWinningPnL = 0, totalLosingPnL = 0;
-let totalRsAchieved = 0; // Total Rs achieved
-let tradeLog = []; // Visible log for the user
-let rawTradeLog = []; // Hidden log with raw data for recalculations
-let startDate = ""; // Starting date of performance
-let endDate = ""; // Ending date of performance
-let lastTradeDate = ""; // Track the date of the last trade
-let riskType = document.getElementById("risk-type").value;
-let dailyRiskAmount = 0;
+  let currentBalance = initialCapital;
+  let totalTrades = 0, wins = 0, losses = 0;
+  let winStreak = 0, lossStreak = 0, maxWinStreak = 0, maxLossStreak = 0;
+  let totalFees = 0, totalPnLAfterFees = 0;
+  let maxDrawdown = 0, peakBalance = initialCapital;
+  let totalWinningPnL = 0, totalLosingPnL = 0;
+  let totalRsAchieved = 0; // Total Rs achieved
+  let tradeLog = []; // Visible log for the user
+  let rawTradeLog = []; // Hidden log with raw data for recalculations
+  let startDate = ""; // Starting date of performance
+  let endDate = ""; // Ending date of performance
+  let lastTradeDate = ""; // Track the date of the last trade
+  let riskType = document.getElementById("risk-type").value;
+  let dailyRiskAmount = 0;
 
-// Event listeners for updating settings
-document.getElementById("risk-type").addEventListener("change", () => {
-  riskType = document.getElementById("risk-type").value;
-  recalculateAllTrades();
-});
-
-document.getElementById("initial-capital").addEventListener("change", () => {
-  initialCapital = parseFloat(document.getElementById("initial-capital").value);
-  recalculateAllTrades();
-});
-
-document.getElementById("risk-amount").addEventListener("change", () => {
-  recalculateAllTrades();
-});
-
-function updateInitialCapital() {
-  initialCapital = parseFloat(document.getElementById("initial-capital").value);
-  currentBalance = initialCapital;
-  peakBalance = initialCapital;
-  recalculateAllTrades();
-}
-
-function adjustDate(increment) {
-  const dateInput = document.getElementById("trade-date");
-  let currentDate = new Date(dateInput.value || new Date());
-  currentDate.setDate(currentDate.getDate() + increment);
-  dateInput.value = currentDate.toISOString().split("T")[0];
-}
-
-function recalculateAllTrades() {
-  // Reset variables for recalculations
-  currentBalance = initialCapital;
-  totalTrades = wins = losses = winStreak = lossStreak = maxWinStreak = maxLossStreak = totalFees = totalPnLAfterFees = totalWinningPnL = totalLosingPnL = maxDrawdown = totalRsAchieved = 0;
-  peakBalance = initialCapital;
-  dailyRiskAmount = 0;
-  tradeLog = []; // Clear visible log
-  lastTradeDate = ""; 
-
-  // Recalculate each trade in rawTradeLog
-  rawTradeLog.forEach(rawTrade => recordTrade(rawTrade.outcome, true, rawTrade.date, rawTrade.rr, rawTrade.slDistance));
-
-  updateSummary();
-  updateTradeLog();
-}
-
-function recordTrade(outcome, recalculating = false, tradeDate = "", rr = 0, slDistance = 0) {
-  rr = recalculating ? rr : parseFloat(document.getElementById("rr").value);
-  slDistance = recalculating ? slDistance : parseFloat(document.getElementById("sl-distance").value);
-  const pipValue = parseFloat(document.getElementById("pip-value").value) || 1;
-  const riskAmount = parseFloat(document.getElementById("risk-amount").value);
-  const costPerLot = parseFloat(document.getElementById("cost-per-lot").value) || 0;
-  const date = tradeDate || document.getElementById("trade-date").value;
-
-  if (!recalculating && (isNaN(rr) || isNaN(slDistance) || isNaN(pipValue) || isNaN(riskAmount) || isNaN(costPerLot))) {
-    alert("Please fill in all fields.");
-    return;
-  }
-
-  let tradeRisk;
-  if (riskType === "fixed-daily") {
-    if (lastTradeDate !== date) {
-      dailyRiskAmount = currentBalance * (riskAmount / 100);
-      lastTradeDate = date;
-    }
-    tradeRisk = dailyRiskAmount;
-  } else if (riskType === "compounding") {
-    tradeRisk = currentBalance * (riskAmount / 100);
-  } else {
-    tradeRisk = riskAmount;
-  }
-  const lots = tradeRisk / (pipValue * slDistance);
-  const fee = lots * costPerLot;
-  totalFees += fee;
-
-  let profitOrLoss = 0;
-  if (outcome === "Win") {
-    profitOrLoss = tradeRisk * rr;
-    totalWinningPnL += profitOrLoss;
-    wins++;
-    winStreak++;
-    lossStreak = 0;
-    totalRsAchieved += rr;
-  } else {
-    profitOrLoss = -tradeRisk * Math.abs(rr);
-    totalLosingPnL += Math.abs(profitOrLoss);
-    losses++;
-    lossStreak++;
-    winStreak = 0;
-    totalRsAchieved -= Math.abs(rr);
-  }
-
-  const finalPnL = profitOrLoss - fee;
-  currentBalance += finalPnL;
-  totalPnLAfterFees += finalPnL;
-
-  totalTrades++;
-  maxWinStreak = Math.max(maxWinStreak, winStreak);
-  maxLossStreak = Math.max(maxLossStreak, lossStreak);
-
-  peakBalance = Math.max(peakBalance, currentBalance);
-  const drawdown = peakBalance - currentBalance;
-  maxDrawdown = Math.max(maxDrawdown, drawdown);
-
-  if (!recalculating) {
-    rawTradeLog.push({ date, outcome, rr, slDistance }); // Store raw trade data
-  }
-  
-  const rrDisplay = outcome === "Win" ? rr.toFixed(2) : (-Math.abs(rr)).toFixed(2);
-  tradeLog.push({ date, outcome, riskAmount: tradeRisk.toFixed(2), lots: lots.toFixed(2), rr: rrDisplay, slDistance, profitOrLoss: profitOrLoss.toFixed(2), fee: fee.toFixed(2), finalPnL: finalPnL.toFixed(2), balance: currentBalance.toFixed(2) });
-
-  if (totalTrades === 1) startDate = date;
-  endDate = date;
-  updateSummary();
-  updateTradeLog();
-}
-
-function goBack() {
-  if (tradeLog.length === 0) {
-    alert("No trades to remove.");
-    return;
-  }
-
-  rawTradeLog.pop(); // Remove from raw log as well
-  const lastTrade = tradeLog.pop();
-  currentBalance -= parseFloat(lastTrade.finalPnL);
-  totalPnLAfterFees -= parseFloat(lastTrade.finalPnL);
-  totalFees -= parseFloat(lastTrade.fee);
-
-  const rrValue = parseFloat(lastTrade.rr);
-  if (rrValue > 0) {
-    wins--;
-    totalWinningPnL -= parseFloat(lastTrade.profitOrLoss);
-    winStreak--;
-    totalRsAchieved -= rrValue;
-  } else {
-    losses--;
-    totalLosingPnL -= Math.abs(parseFloat(lastTrade.profitOrLoss));
-    lossStreak--;
-    totalRsAchieved += Math.abs(rrValue);
-  }
-
-  totalTrades--;
-  updateSummary();
-  updateTradeLog();
-}
-
-function updateSummary() {
-  document.getElementById("total-trades").textContent = totalTrades;
-  document.getElementById("win-rate").textContent = totalTrades > 0 ? ((wins / totalTrades) * 100).toFixed(2) + "%" : "0%";
-  document.getElementById("max-win-streak").textContent = maxWinStreak;
-  document.getElementById("max-loss-streak").textContent = maxLossStreak;
-  document.getElementById("max-drawdown").textContent = `${((maxDrawdown / peakBalance) * 100).toFixed(2)}% / $${maxDrawdown.toFixed(2)}`;
-  document.getElementById("average-win").textContent = wins > 0 ? (totalWinningPnL / wins).toFixed(2) : "0";
-  document.getElementById("average-loss").textContent = losses > 0 ? (totalLosingPnL / losses).toFixed(2) : "0";
-  document.getElementById("profit-factor").textContent = totalLosingPnL > 0 ? (totalWinningPnL / totalLosingPnL).toFixed(2) : "0";
-  document.getElementById("total-fees").textContent = totalFees.toFixed(2);
-  document.getElementById("pnl-after-fees").textContent = totalPnLAfterFees.toFixed(2);
-  document.getElementById("cumulative-balance").textContent = currentBalance.toFixed(2);
-  document.getElementById("total-rs-achieved").textContent = totalRsAchieved.toFixed(2);
-  document.getElementById("date-range").textContent = `${startDate} to ${endDate}`;
-}
-
-function updateTradeLog() {
-  const tradeLogEl = document.getElementById("trade-log");
-  tradeLogEl.innerHTML = "";
-  tradeLog.forEach((trade) => {
-    const li = document.createElement("li");
-    li.textContent = `${trade.date} - Risk: ${trade.riskAmount}, Lots: ${trade.lots}, RR: ${trade.rr}, SL: ${trade.slDistance} pips, PnL: ${trade.profitOrLoss}, Fees: ${trade.fee}, Final PnL: ${trade.finalPnL} (Balance: ${trade.balance})`;
-    tradeLogEl.appendChild(li);
+  // Event listeners for updating settings
+  document.getElementById("risk-type").addEventListener("change", () => {
+    riskType = document.getElementById("risk-type").value;
+    recalculateAllTrades();
   });
-}
 
-function resetBacktest() {
-  currentBalance = initialCapital;
-  totalTrades = wins = losses = winStreak = lossStreak = maxWinStreak = maxLossStreak = totalFees = totalPnLAfterFees = totalWinningPnL = totalLosingPnL = maxDrawdown = totalRsAchieved = 0;
-  peakBalance = initialCapital;
-  tradeLog = [];
-  rawTradeLog = []; // Reset raw log
-  startDate = "";
-  endDate = "";
-  updateSummary();
-  updateTradeLog();
-}
+  document.getElementById("initial-capital").addEventListener("change", () => {
+    initialCapital = parseFloat(document.getElementById("initial-capital").value);
+    recalculateAllTrades();
+  });
 
-function exportLog() {
-  const headers = "Date,Risk Amount,Lots,RR,SL Distance (pips),PnL,Fees,Final PnL,Balance\n";
-  const csvContent = tradeLog.map(trade => 
-    `${trade.date},${trade.riskAmount},${trade.lots},${trade.rr},${trade.slDistance},${trade.profitOrLoss},${trade.fee},${trade.finalPnL},${trade.balance}`
-  ).join("\n");
-  const blob = new Blob([headers + csvContent], { type: "text/csv" });
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = "trade-log.csv";
-  link.click();
-}
+  document.getElementById("risk-amount").addEventListener("change", () => {
+    recalculateAllTrades();
+  });
 
-function showRiskInfo() {
+  function updateInitialCapital() {
+    initialCapital = parseFloat(document.getElementById("initial-capital").value);
+    currentBalance = initialCapital;
+    peakBalance = initialCapital;
+    recalculateAllTrades();
+  }
+
+  function adjustDate(increment) {
+    const dateInput = document.getElementById("trade-date");
+    let currentDate = new Date(dateInput.value || new Date());
+    currentDate.setDate(currentDate.getDate() + increment);
+    dateInput.value = currentDate.toISOString().split("T")[0];
+  }
+
+  function recalculateAllTrades() {
+    // Reset variables for recalculations
+    currentBalance = initialCapital;
+    totalTrades = wins = losses = winStreak = lossStreak = maxWinStreak = maxLossStreak = totalFees = totalPnLAfterFees = totalWinningPnL = totalLosingPnL = maxDrawdown = totalRsAchieved = 0;
+    peakBalance = initialCapital;
+    dailyRiskAmount = 0;
+    tradeLog = []; // Clear visible log
+    lastTradeDate = ""; 
+
+    // Recalculate each trade in rawTradeLog
+    rawTradeLog.forEach(rawTrade => recordTrade(rawTrade.outcome, true, rawTrade.date, rawTrade.rr, rawTrade.slDistance));
+
+    updateSummary();
+    updateTradeLog();
+  }
+
+  function recordTrade(outcome, recalculating = false, tradeDate = "", rr = 0, slDistance = 0) {
+    rr = recalculating ? rr : parseFloat(document.getElementById("rr").value);
+    slDistance = recalculating ? slDistance : parseFloat(document.getElementById("sl-distance").value);
+    const pipValue = parseFloat(document.getElementById("pip-value").value) || 1;
+    const riskAmount = parseFloat(document.getElementById("risk-amount").value);
+    const costPerLot = parseFloat(document.getElementById("cost-per-lot").value) || 0;
+    const date = tradeDate || document.getElementById("trade-date").value;
+
+    if (!recalculating && (isNaN(rr) || isNaN(slDistance) || isNaN(pipValue) || isNaN(riskAmount) || isNaN(costPerLot))) {
+      alert("Please fill in all fields.");
+      return;
+    }
+
+    let tradeRisk;
+    if (riskType === "fixed-daily") {
+      if (lastTradeDate !== date) {
+        dailyRiskAmount = currentBalance * (riskAmount / 100);
+        lastTradeDate = date;
+      }
+      tradeRisk = dailyRiskAmount;
+    } else if (riskType === "compounding") {
+      tradeRisk = currentBalance * (riskAmount / 100);
+    } else {
+      tradeRisk = riskAmount;
+    }
+    const lots = tradeRisk / (pipValue * slDistance);
+    const fee = lots * costPerLot;
+    totalFees += fee;
+
+    let profitOrLoss = 0;
+    if (outcome === "Win") {
+      profitOrLoss = tradeRisk * rr;
+      totalWinningPnL += profitOrLoss;
+      wins++;
+      winStreak++;
+      lossStreak = 0;
+      totalRsAchieved += rr;
+    } else {
+      profitOrLoss = -tradeRisk * Math.abs(rr);
+      totalLosingPnL += Math.abs(profitOrLoss);
+      losses++;
+      lossStreak++;
+      winStreak = 0;
+      totalRsAchieved -= Math.abs(rr);
+    }
+
+    const finalPnL = profitOrLoss - fee;
+    currentBalance += finalPnL;
+    totalPnLAfterFees += finalPnL;
+
+    totalTrades++;
+    maxWinStreak = Math.max(maxWinStreak, winStreak);
+    maxLossStreak = Math.max(maxLossStreak, lossStreak);
+
+    peakBalance = Math.max(peakBalance, currentBalance);
+    const drawdown = peakBalance - currentBalance;
+    maxDrawdown = Math.max(maxDrawdown, drawdown);
+
+    if (!recalculating) {
+      rawTradeLog.push({ date, outcome, rr, slDistance }); // Store raw trade data
+    }
+    
+    const rrDisplay = outcome === "Win" ? rr.toFixed(2) : (-Math.abs(rr)).toFixed(2);
+    tradeLog.push({ date, outcome, riskAmount: tradeRisk.toFixed(2), lots: lots.toFixed(2), rr: rrDisplay, slDistance, profitOrLoss: profitOrLoss.toFixed(2), fee: fee.toFixed(2), finalPnL: finalPnL.toFixed(2), balance: currentBalance.toFixed(2) });
+
+    if (totalTrades === 1) startDate = date;
+    endDate = date;
+    updateSummary();
+    updateTradeLog();
+  }
+
+  function goBack() {
+    if (tradeLog.length === 0) {
+      alert("No trades to remove.");
+      return;
+    }
+
+    rawTradeLog.pop(); // Remove from raw log as well
+    const lastTrade = tradeLog.pop();
+    currentBalance -= parseFloat(lastTrade.finalPnL);
+    totalPnLAfterFees -= parseFloat(lastTrade.finalPnL);
+    totalFees -= parseFloat(lastTrade.fee);
+
+    const rrValue = parseFloat(lastTrade.rr);
+    if (rrValue > 0) {
+      wins--;
+      totalWinningPnL -= parseFloat(lastTrade.profitOrLoss);
+      winStreak--;
+      totalRsAchieved -= rrValue;
+    } else {
+      losses--;
+      totalLosingPnL -= Math.abs(parseFloat(lastTrade.profitOrLoss));
+      lossStreak--;
+      totalRsAchieved += Math.abs(rrValue);
+    }
+
+    totalTrades--;
+    updateSummary();
+    updateTradeLog();
+  }
+
+  function updateSummary() {
+    document.getElementById("total-trades").textContent = totalTrades;
+    document.getElementById("win-rate").textContent = totalTrades > 0 ? ((wins / totalTrades) * 100).toFixed(2) + "%" : "0%";
+    document.getElementById("max-win-streak").textContent = maxWinStreak;
+    document.getElementById("max-loss-streak").textContent = maxLossStreak;
+    document.getElementById("max-drawdown").textContent = `${((maxDrawdown / peakBalance) * 100).toFixed(2)}% / $${maxDrawdown.toFixed(2)}`;
+    document.getElementById("average-win").textContent = wins > 0 ? (totalWinningPnL / wins).toFixed(2) : "0";
+    document.getElementById("average-loss").textContent = losses > 0 ? (totalLosingPnL / losses).toFixed(2) : "0";
+    document.getElementById("profit-factor").textContent = totalLosingPnL > 0 ? (totalWinningPnL / totalLosingPnL).toFixed(2) : "0";
+    document.getElementById("total-fees").textContent = totalFees.toFixed(2);
+    document.getElementById("pnl-after-fees").textContent = totalPnLAfterFees.toFixed(2);
+    document.getElementById("cumulative-balance").textContent = currentBalance.toFixed(2);
+    document.getElementById("total-rs-achieved").textContent = totalRsAchieved.toFixed(2);
+    document.getElementById("date-range").textContent = `${startDate} to ${endDate}`;
+  }
+
+  function updateTradeLog() {
+    const tradeLogEl = document.getElementById("trade-log");
+    tradeLogEl.innerHTML = "";
+    tradeLog.forEach((trade) => {
+      const li = document.createElement("li");
+      li.textContent = `${trade.date} - Risk: ${trade.riskAmount}, Lots: ${trade.lots}, RR: ${trade.rr}, SL: ${trade.slDistance} pips, PnL: ${trade.profitOrLoss}, Fees: ${trade.fee}, Final PnL: ${trade.finalPnL} (Balance: ${trade.balance})`;
+      tradeLogEl.appendChild(li);
+    });
+  }
+
+  function resetBacktest() {
+    currentBalance = initialCapital;
+    totalTrades = wins = losses = winStreak = lossStreak = maxWinStreak = maxLossStreak = totalFees = totalPnLAfterFees = totalWinningPnL = totalLosingPnL = maxDrawdown = totalRsAchieved = 0;
+    peakBalance = initialCapital;
+    tradeLog = [];
+    rawTradeLog = []; // Reset raw log
+    startDate = "";
+    endDate = "";
+    updateSummary();
+    updateTradeLog();
+  }
+
+  function exportLog() {
+    const headers = "Date,Risk Amount,Lots,RR,SL Distance (pips),PnL,Fees,Final PnL,Balance\n";
+    const csvContent = tradeLog.map(trade => 
+      `${trade.date},${trade.riskAmount},${trade.lots},${trade.rr},${trade.slDistance},${trade.profitOrLoss},${trade.fee},${trade.finalPnL},${trade.balance}`
+    ).join("\n");
+    const blob = new Blob([headers + csvContent], { type: "text/csv" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "trade-log.csv";
+    link.click();
+  }
+
+  function showRiskInfo() {
   document.getElementById("riskInfoModal").style.display = "flex";
 }
 
@@ -489,5 +488,16 @@ function closeRiskInfo() {
 }
 </script>
 
+  <!-- Modal for Risk Type Info -->
+<div id="riskInfoModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); justify-content: center; align-items: center;">
+  <div style="background-color: white; padding: 20px; border-radius: 10px; max-width: 400px; width: 90%; text-align: center;">
+    <h3>Risk Type Explanation</h3>
+    <p><strong>Daily Fixed Percentage Risk:</strong> Calculates the risk amount based on a percentage of the initial balance at the start of each day. This amount is applied to all trades on the same day.</p>
+    <p><strong>Compounding Risk (Per Trade):</strong> Calculates the risk amount based on a percentage of the current balance after each trade. This allows the risk to grow or shrink dynamically with each trade.</p>
+    <p><strong>Fixed Dollar Amount:</strong> Uses a set dollar amount for risk on each trade, regardless of balance changes.</p>
+    <button onclick="closeRiskInfo()" style="margin-top: 15px; padding: 10px 20px; background-color: #007aff; color: white; border: none; border-radius: 5px; cursor: pointer;">Close</button>
+  </div>
+</div>
+  
 </body>
 </html>
