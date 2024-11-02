@@ -273,10 +273,23 @@
   let startDate = ""; // Starting date of performance
   let endDate = ""; // Ending date of performance
   let lastTradeDate = ""; // Track the date of the last trade
-  let dailyRiskAmount = 0; // Fixed daily risk amount for "fixed-daily" type
+  let riskType = document.getElementById("risk-type").value; // Default risk type based on selection
+  let dailyRiskAmount = 0; // Track daily risk for "fixed-daily"
 
-  // Store risk type globally
-  let riskType = document.getElementById("risk-type").value;
+  // Event listeners for updating settings
+  document.getElementById("risk-type").addEventListener("change", () => {
+    riskType = document.getElementById("risk-type").value;
+    recalculateAllTrades();
+  });
+
+  document.getElementById("initial-capital").addEventListener("change", () => {
+    initialCapital = parseFloat(document.getElementById("initial-capital").value);
+    recalculateAllTrades();
+  });
+
+  document.getElementById("risk-amount").addEventListener("change", () => {
+    recalculateAllTrades();
+  });
 
   function updateInitialCapital() {
     initialCapital = parseFloat(document.getElementById("initial-capital").value);
@@ -299,8 +312,13 @@
     peakBalance = initialCapital;
     dailyRiskAmount = 0;
     lastTradeDate = ""; // Reset date tracking for "fixed-daily"
+    
+    // Clear and recalculate all trades
     tradeLog.forEach(trade => recordTrade(trade.outcome, true, trade.date)); // Recalculate all trades without recording them in the log
+
+    // Update both the summary and the trade log
     updateSummary();
+    updateTradeLog();
   }
 
   function recordTrade(outcome, recalculating = false, tradeDate = "") {
@@ -319,17 +337,19 @@
     // Determine risk based on the selected type
     let tradeRisk;
     if (riskType === "fixed-daily") {
+      // Use the same risk amount for all trades on the same day
       if (lastTradeDate !== date) {
-        dailyRiskAmount = currentBalance * (riskAmount / 100); // Calculate once for each date
-        lastTradeDate = date; // Update to current date
+        dailyRiskAmount = currentBalance * (riskAmount / 100);
+        lastTradeDate = date;
       }
       tradeRisk = dailyRiskAmount;
     } else if (riskType === "compounding") {
+      // Calculate new risk for each trade based on current balance
       tradeRisk = currentBalance * (riskAmount / 100);
     } else {
-      tradeRisk = riskAmount; // Fixed dollar amount
+      // Fixed dollar amount risk
+      tradeRisk = riskAmount;
     }
-
     const lots = tradeRisk / (pipValue * slDistance);
     const fee = lots * costPerLot;
     totalFees += fee;
@@ -435,8 +455,6 @@
     tradeLog = [];
     startDate = "";
     endDate = "";
-    dailyRiskAmount = 0;
-    lastTradeDate = "";
     updateSummary();
     updateTradeLog();
   }
@@ -453,11 +471,6 @@
     link.click();
   }
 
-  // Event listener for risk type change to recalculate all trades
-  document.getElementById("risk-type").addEventListener("change", (e) => {
-    riskType = e.target.value;
-    recalculateAllTrades();
-  });
 </script>
 
 </body>
