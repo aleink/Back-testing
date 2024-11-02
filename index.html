@@ -177,6 +177,26 @@
     .trade-log li:last-child {
       border-bottom: none;
     }
+    /* Modal Styling */
+    #riskInfoModal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+    }
+    #riskInfoModalContent {
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -190,7 +210,9 @@
     <label for="initial-capital">Initial Capital ($):</label>
     <input type="number" id="initial-capital" placeholder="Enter initial capital" value="10000" onchange="updateInitialCapital()">
 
-    <label for="risk-type">Risk Type:</label>
+    <label for="risk-type">Risk Type:
+      <span style="cursor: pointer; color: #007aff; font-weight: bold;" onclick="showRiskInfo()">ℹ️</span>
+    </label>
     <select id="risk-type" onchange="recalculateAllTrades()">
       <option value="fixed-daily">Daily Fixed Percentage Risk</option>
       <option value="compounding">Compounding Risk (Per Trade)</option>
@@ -260,6 +282,17 @@
   </div>
 </div>
 
+<!-- Modal for Risk Type Info -->
+<div id="riskInfoModal">
+  <div id="riskInfoModalContent">
+    <h3>Risk Type Explanation</h3>
+    <p><strong>Daily Fixed Percentage Risk:</strong> Calculates the risk amount based on a percentage of the initial balance at the start of each day. This amount is applied to all trades on the same day.</p>
+    <p><strong>Compounding Risk (Per Trade):</strong> Calculates the risk amount based on a percentage of the current balance after each trade. This allows the risk to grow or shrink dynamically with each trade.</p>
+    <p><strong>Fixed Dollar Amount:</strong> Uses a set dollar amount for risk on each trade, regardless of balance changes.</p>
+    <button onclick="closeRiskInfo()" style="margin-top: 15px; padding: 10px 20px; background-color: #007aff; color: white; border: none; border-radius: 5px; cursor: pointer;">Close</button>
+  </div>
+</div>
+
 <script>
   let initialCapital = parseFloat(document.getElementById("initial-capital").value);
   let currentBalance = initialCapital;
@@ -268,29 +301,12 @@
   let totalFees = 0, totalPnLAfterFees = 0;
   let maxDrawdown = 0, peakBalance = initialCapital;
   let totalWinningPnL = 0, totalLosingPnL = 0;
-  let totalRsAchieved = 0; // Total Rs achieved
-  let tradeLog = []; // Visible log for the user
-  let rawTradeLog = []; // Hidden log with raw data for recalculations
-  let startDate = ""; // Starting date of performance
-  let endDate = ""; // Ending date of performance
-  let lastTradeDate = ""; // Track the date of the last trade
-  let riskType = document.getElementById("risk-type").value;
-  let dailyRiskAmount = 0;
-
-  // Event listeners for updating settings
-  document.getElementById("risk-type").addEventListener("change", () => {
-    riskType = document.getElementById("risk-type").value;
-    recalculateAllTrades();
-  });
-
-  document.getElementById("initial-capital").addEventListener("change", () => {
-    initialCapital = parseFloat(document.getElementById("initial-capital").value);
-    recalculateAllTrades();
-  });
-
-  document.getElementById("risk-amount").addEventListener("change", () => {
-    recalculateAllTrades();
-  });
+  let totalRsAchieved = 0;
+  let tradeLog = [];
+  let startDate = ""; 
+  let endDate = ""; 
+  let lastTradeDate = ""; 
+  let riskType = "fixed-daily";
 
   function updateInitialCapital() {
     initialCapital = parseFloat(document.getElementById("initial-capital").value);
@@ -307,24 +323,16 @@
   }
 
   function recalculateAllTrades() {
-    // Reset variables for recalculations
     currentBalance = initialCapital;
     totalTrades = wins = losses = winStreak = lossStreak = maxWinStreak = maxLossStreak = totalFees = totalPnLAfterFees = totalWinningPnL = totalLosingPnL = maxDrawdown = totalRsAchieved = 0;
     peakBalance = initialCapital;
-    dailyRiskAmount = 0;
-    tradeLog = []; // Clear visible log
-    lastTradeDate = ""; 
-
-    // Recalculate each trade in rawTradeLog
-    rawTradeLog.forEach(rawTrade => recordTrade(rawTrade.outcome, true, rawTrade.date, rawTrade.rr, rawTrade.slDistance));
-
+    tradeLog.forEach(trade => recordTrade(trade.outcome, true, trade.date));
     updateSummary();
-    updateTradeLog();
   }
 
-  function recordTrade(outcome, recalculating = false, tradeDate = "", rr = 0, slDistance = 0) {
-    rr = recalculating ? rr : parseFloat(document.getElementById("rr").value);
-    slDistance = recalculating ? slDistance : parseFloat(document.getElementById("sl-distance").value);
+  function recordTrade(outcome, recalculating = false, tradeDate = "") {
+    const rr = parseFloat(document.getElementById("rr").value);
+    const slDistance = parseFloat(document.getElementById("sl-distance").value);
     const pipValue = parseFloat(document.getElementById("pip-value").value) || 1;
     const riskAmount = parseFloat(document.getElementById("risk-amount").value);
     const costPerLot = parseFloat(document.getElementById("cost-per-lot").value) || 0;
@@ -337,11 +345,8 @@
 
     let tradeRisk;
     if (riskType === "fixed-daily") {
-      if (lastTradeDate !== date) {
-        dailyRiskAmount = currentBalance * (riskAmount / 100);
-        lastTradeDate = date;
-      }
-      tradeRisk = dailyRiskAmount;
+      if (lastTradeDate !== date) tradeRisk = currentBalance * (riskAmount / 100);
+      else tradeRisk = currentBalance * (riskAmount / 100);
     } else if (riskType === "compounding") {
       tradeRisk = currentBalance * (riskAmount / 100);
     } else {
@@ -381,16 +386,13 @@
     maxDrawdown = Math.max(maxDrawdown, drawdown);
 
     if (!recalculating) {
-      rawTradeLog.push({ date, outcome, rr, slDistance }); // Store raw trade data
+      const rrDisplay = outcome === "Win" ? rr.toFixed(2) : (-Math.abs(rr)).toFixed(2);
+      tradeLog.push({ date, outcome, riskAmount: tradeRisk.toFixed(2), lots: lots.toFixed(2), rr: rrDisplay, slDistance, profitOrLoss: profitOrLoss.toFixed(2), fee: fee.toFixed(2), finalPnL: finalPnL.toFixed(2), balance: currentBalance.toFixed(2) });
+      updateTradeLog();
     }
-    
-    const rrDisplay = outcome === "Win" ? rr.toFixed(2) : (-Math.abs(rr)).toFixed(2);
-    tradeLog.push({ date, outcome, riskAmount: tradeRisk.toFixed(2), lots: lots.toFixed(2), rr: rrDisplay, slDistance, profitOrLoss: profitOrLoss.toFixed(2), fee: fee.toFixed(2), finalPnL: finalPnL.toFixed(2), balance: currentBalance.toFixed(2) });
-
     if (totalTrades === 1) startDate = date;
     endDate = date;
     updateSummary();
-    updateTradeLog();
   }
 
   function goBack() {
@@ -399,7 +401,6 @@
       return;
     }
 
-    rawTradeLog.pop(); // Remove from raw log as well
     const lastTrade = tradeLog.pop();
     currentBalance -= parseFloat(lastTrade.finalPnL);
     totalPnLAfterFees -= parseFloat(lastTrade.finalPnL);
@@ -454,7 +455,6 @@
     totalTrades = wins = losses = winStreak = lossStreak = maxWinStreak = maxLossStreak = totalFees = totalPnLAfterFees = totalWinningPnL = totalLosingPnL = maxDrawdown = totalRsAchieved = 0;
     peakBalance = initialCapital;
     tradeLog = [];
-    rawTradeLog = []; // Reset raw log
     startDate = "";
     endDate = "";
     updateSummary();
@@ -471,6 +471,20 @@
     link.href = URL.createObjectURL(blob);
     link.download = "trade-log.csv";
     link.click();
+  }
+
+  // Event listener for risk type change to recalculate all trades
+  document.getElementById("risk-type").addEventListener("change", (e) => {
+    riskType = e.target.value;
+    recalculateAllTrades();
+  });
+
+  function showRiskInfo() {
+    document.getElementById("riskInfoModal").style.display = "flex";
+  }
+
+  function closeRiskInfo() {
+    document.getElementById("riskInfoModal").style.display = "none";
   }
 </script>
 
