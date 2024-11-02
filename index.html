@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TradeTrack Pro</title>
   <link rel="icon" href="favicon.ico" type="image/x-icon">
-  <style>
+    <style>
     /* Styling */
     * {
       box-sizing: border-box;
@@ -14,29 +14,38 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     }
     body {
-      background-color: #fefefe;
+      background-color: #121212;
+      color: #ffffff;
       padding: 20px;
       display: flex;
       justify-content: center;
       align-items: center;
       flex-direction: column;
-      color: #333;
+      min-height: 100vh;
     }
-    h1 {
-      font-size: 24px;
-      font-weight: 600;
-      color: #333;
+    .header {
+      width: 100%;
+      max-width: 500px;
+      background-color: #1f1f1f;
+      padding: 15px;
       text-align: center;
+      border-radius: 10px;
       margin-bottom: 20px;
+      color: white;
+      font-size: 24px;
+      font-weight: bold;
     }
     .container {
       max-width: 500px;
       width: 100%;
-      background-color: #fff;
+      background-color: #1f1f1f;
       border-radius: 15px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
       padding: 20px;
       margin-top: 20px;
+    }
+    .section h2, label {
+      color: #b3b3b3;
     }
     .section {
       margin-bottom: 20px;
@@ -45,16 +54,17 @@
       display: block;
       font-weight: 500;
       margin-bottom: 6px;
-      color: #555;
+      color: #b3b3b3;
     }
     input[type="number"], input[type="date"], select {
       width: 100%;
       padding: 12px;
       font-size: 16px;
       margin-bottom: 10px;
-      border: 1px solid #ddd;
+      border: 1px solid #333;
       border-radius: 8px;
-      background-color: #f9f9f9;
+      background-color: #333;
+      color: #ffffff;
       transition: border-color 0.3s ease;
     }
     input[type="number"]:focus, input[type="date"]:focus, select:focus {
@@ -86,16 +96,16 @@
       justify-content: space-between;
       gap: 10px;
     }
-    .win-button, .loss-button {
-      flex: 1;
+    .win-button, .loss-button, .reset-button, .export-button, .back-button {
       padding: 12px;
       font-size: 16px;
       font-weight: 500;
+      color: #fff;
       border: none;
       border-radius: 8px;
       cursor: pointer;
       transition: background-color 0.3s ease;
-      color: #fff;
+      width: 100%;
     }
     .win-button {
       background-color: #34c759;
@@ -108,18 +118,6 @@
     }
     .loss-button:hover {
       background-color: #d12a21;
-    }
-    .reset-button, .export-button, .back-button {
-      width: 100%;
-      padding: 12px;
-      font-size: 16px;
-      font-weight: 500;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      margin-top: 15px;
-      transition: background-color 0.3s ease;
     }
     .reset-button {
       background-color: #007aff;
@@ -141,27 +139,27 @@
       background-color: #cc7a00;
     }
     .summary, .log-section {
-      background-color: #f2f2f7;
+      background-color: #1f1f1f;
       padding: 15px;
       border-radius: 10px;
       margin-top: 20px;
     }
     .summary h2, .log-section h2 {
       font-size: 18px;
-      color: #333;
+      color: #ffffff;
       margin-bottom: 10px;
       font-weight: 500;
     }
-    .summary p, .log-section p {
+    .summary p, .log-section p, .trade-log li {
       font-size: 16px;
-      color: #666;
+      color: #b3b3b3;
       margin: 8px 0;
     }
     .trade-log {
       max-height: 200px;
       overflow-y: auto;
       margin-top: 10px;
-      border-top: 1px solid #ddd;
+      border-top: 1px solid #333;
       padding-top: 10px;
     }
     .trade-log ul {
@@ -170,9 +168,8 @@
     }
     .trade-log li {
       padding: 8px;
-      border-bottom: 1px solid #ddd;
+      border-bottom: 1px solid #333;
       font-size: 14px;
-      color: #333;
     }
     .trade-log li:last-child {
       border-bottom: none;
