@@ -6,7 +6,7 @@
   <title>TradeTrack Pro</title>
   <link rel="icon" href="favicon.ico" type="image/x-icon">
   <style>
-    /* Base Styling */
+    /* Styling */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -14,27 +14,27 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     }
     body {
-      background-color: #121212;
+      background-color: #fefefe;
       padding: 20px;
       display: flex;
       justify-content: center;
       align-items: center;
       flex-direction: column;
-      color: #E0E0E0;
+      color: #333;
     }
     h1 {
       font-size: 24px;
       font-weight: 600;
+      color: #333;
       text-align: center;
       margin-bottom: 20px;
-      color: #ffffff;
     }
     .container {
       max-width: 500px;
       width: 100%;
-      background-color: #1E1E1E;
+      background-color: #fff;
       border-radius: 15px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
       padding: 20px;
       margin-top: 20px;
     }
@@ -45,17 +45,16 @@
       display: block;
       font-weight: 500;
       margin-bottom: 6px;
-      color: #B3B3B3;
+      color: #555;
     }
     input[type="number"], input[type="date"], select {
       width: 100%;
       padding: 12px;
       font-size: 16px;
       margin-bottom: 10px;
-      border: 1px solid #333;
+      border: 1px solid #ddd;
       border-radius: 8px;
-      background-color: #333;
-      color: #E0E0E0;
+      background-color: #f9f9f9;
       transition: border-color 0.3s ease;
     }
     input[type="number"]:focus, input[type="date"]:focus, select:focus {
@@ -142,27 +141,27 @@
       background-color: #cc7a00;
     }
     .summary, .log-section {
-      background-color: #1E1E1E;
+      background-color: #f2f2f7;
       padding: 15px;
       border-radius: 10px;
       margin-top: 20px;
     }
     .summary h2, .log-section h2 {
       font-size: 18px;
-      color: #E0E0E0;
+      color: #333;
       margin-bottom: 10px;
       font-weight: 500;
     }
     .summary p, .log-section p {
       font-size: 16px;
-      color: #B3B3B3;
+      color: #666;
       margin: 8px 0;
     }
     .trade-log {
       max-height: 200px;
       overflow-y: auto;
       margin-top: 10px;
-      border-top: 1px solid #333;
+      border-top: 1px solid #ddd;
       padding-top: 10px;
     }
     .trade-log ul {
@@ -171,27 +170,12 @@
     }
     .trade-log li {
       padding: 8px;
-      border-bottom: 1px solid #333;
+      border-bottom: 1px solid #ddd;
       font-size: 14px;
-      color: #E0E0E0;
+      color: #333;
     }
     .trade-log li:last-child {
       border-bottom: none;
-    }
-    /* Toggle for Dark Mode */
-    .toggle-button {
-      background-color: #333;
-      color: #fff;
-      padding: 10px;
-      border-radius: 8px;
-      cursor: pointer;
-      margin-bottom: 20px;
-      font-weight: bold;
-      font-size: 16px;
-      text-align: center;
-    }
-    .toggle-button:hover {
-      background-color: #555;
     }
   </style>
 </head>
@@ -201,8 +185,6 @@
 <div style="width: 100%; max-width: 500px; background-color: black; padding: 15px; text-align: center; border-radius: 10px; margin-bottom: 20px;">
   <h1 style="color: white; font-size: 24px; font-weight: bold; margin: 0;">TradeTrack Pro</h1>
 </div>
-
-<div class="toggle-button" onclick="toggleDarkMode()">Toggle Dark/Light Mode</div>
 
 <div class="container">
   <!-- General Settings -->
@@ -262,7 +244,9 @@
     <p>Max Win Streak: <span id="max-win-streak">0</span></p>
     <p>Max Loss Streak: <span id="max-loss-streak">0</span></p>
     <p>Max Drawdown: <span id="max-drawdown">0% / $0</span></p>
-    <p>Average Win: <span id="average-win">0</span></p>
+    <p>Average Win: <span id="average-win">0</span></
+
+p>
     <p>Average Loss: <span id="average-loss">0</span></p>
     <p>Profit Factor: <span id="profit-factor">0</span></p>
     <p>Total Rs Achieved: <span id="total-rs-achieved">0</span></p>
@@ -284,20 +268,6 @@
 </div>
 
 <script>
-  let darkMode = true;
-  function toggleDarkMode() {
-    darkMode = !darkMode;
-    document.body.style.backgroundColor = darkMode ? "#121212" : "#FFFFFF";
-    document.body.style.color = darkMode ? "#E0E0E0" : "#333";
-    document.querySelectorAll(".container, .summary, .log-section").forEach(el => {
-      el.style.backgroundColor = darkMode ? "#1E1E1E" : "#FFFFFF";
-    });
-    document.querySelectorAll("input, select").forEach(el => {
-      el.style.backgroundColor = darkMode ? "#333" : "#F9F9F9";
-      el.style.color = darkMode ? "#E0E0E0" : "#333";
-      el.style.borderColor = darkMode ? "#333" : "#DDD";
-    });
-  }
   let initialCapital = parseFloat(document.getElementById("initial-capital").value);
 let currentBalance = initialCapital;
 let totalTrades = 0, wins = 0, losses = 0;
@@ -518,16 +488,6 @@ function closeRiskInfo() {
   document.getElementById("riskInfoModal").style.display = "none";
 }
 </script>
-
-<div id="riskInfoModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); justify-content: center; align-items: center;">
-  <div style="background-color: white; padding: 20px; border-radius: 10px; max-width: 400px; width: 90%; text-align: center;">
-    <h3>Risk Type Explanation</h3>
-    <p><strong>Daily Fixed Percentage Risk:</strong> Calculates the risk amount based on a percentage of the initial balance at the start of each day. This amount is applied to all trades on the same day.</p>
-    <p><strong>Compounding Risk (Per Trade):</strong> Calculates the risk amount based on a percentage of the current balance after each trade. This allows the risk to grow or shrink dynamically with each trade.</p>
-    <p><strong>Fixed Dollar Amount:</strong> Uses a set dollar amount for risk on each trade, regardless of balance changes.</p>
-    <button onclick="closeRiskInfo()" style="margin-top: 15px; padding: 10px 20px; background-color: #007aff; color: white; border: none; border-radius: 5px; cursor: pointer;">Close</button>
-  </div>
-</div>
 
 </body>
 </html>
