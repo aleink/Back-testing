@@ -273,12 +273,15 @@
   let startDate = ""; // Starting date of performance
   let endDate = ""; // Ending date of performance
   let lastTradeDate = ""; // Track the date of the last trade
-  let riskType = "fixed-daily"; // Default to Daily Fixed Percentage Risk
+  let dailyRiskAmount = 0; // Fixed daily risk amount for "fixed-daily" type
+
+  // Store risk type globally
+  let riskType = document.getElementById("risk-type").value;
 
   function updateInitialCapital() {
     initialCapital = parseFloat(document.getElementById("initial-capital").value);
     currentBalance = initialCapital;
-        peakBalance = initialCapital;
+    peakBalance = initialCapital;
     recalculateAllTrades();
   }
 
@@ -294,6 +297,8 @@
     currentBalance = initialCapital;
     totalTrades = wins = losses = winStreak = lossStreak = maxWinStreak = maxLossStreak = totalFees = totalPnLAfterFees = totalWinningPnL = totalLosingPnL = maxDrawdown = totalRsAchieved = 0;
     peakBalance = initialCapital;
+    dailyRiskAmount = 0;
+    lastTradeDate = ""; // Reset date tracking for "fixed-daily"
     tradeLog.forEach(trade => recordTrade(trade.outcome, true, trade.date)); // Recalculate all trades without recording them in the log
     updateSummary();
   }
@@ -314,13 +319,17 @@
     // Determine risk based on the selected type
     let tradeRisk;
     if (riskType === "fixed-daily") {
-      if (lastTradeDate !== date) tradeRisk = currentBalance * (riskAmount / 100);
-      else tradeRisk = currentBalance * (riskAmount / 100);
+      if (lastTradeDate !== date) {
+        dailyRiskAmount = currentBalance * (riskAmount / 100); // Calculate once for each date
+        lastTradeDate = date; // Update to current date
+      }
+      tradeRisk = dailyRiskAmount;
     } else if (riskType === "compounding") {
       tradeRisk = currentBalance * (riskAmount / 100);
     } else {
-      tradeRisk = riskAmount;
+      tradeRisk = riskAmount; // Fixed dollar amount
     }
+
     const lots = tradeRisk / (pipValue * slDistance);
     const fee = lots * costPerLot;
     totalFees += fee;
@@ -426,6 +435,8 @@
     tradeLog = [];
     startDate = "";
     endDate = "";
+    dailyRiskAmount = 0;
+    lastTradeDate = "";
     updateSummary();
     updateTradeLog();
   }
