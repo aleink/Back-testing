@@ -203,8 +203,10 @@
     <label for="risk-amount">Risk Amount (% or $):</label>
     <input type="number" id="risk-amount" placeholder="Enter risk amount" step="0.01" value="1">
 
-    <label for="pip-value">Pip Value:</label>
-    <input type="number" id="pip-value" placeholder="Enter pip value" step="0.01">
+<label for="pip-value">Pip Value:
+  <span style="cursor: pointer; color: #007aff; font-weight: bold;" onclick="showPipInfo()">ℹ️</span>
+</label>
+<input type="number" id="pip-value" placeholder="Enter pip value" step="0.01">
 
     <label for="cost-per-lot">Cost per Lot:</label>
     <input type="number" id="cost-per-lot" placeholder="Enter cost per lot" step="0.01">
@@ -483,6 +485,14 @@
 function closeRiskInfo() {
   document.getElementById("riskInfoModal").style.display = "none";
 }
+
+  function showPipInfo() {
+  document.getElementById("pipInfoModal").style.display = "flex";
+}
+
+function closePipInfo() {
+  document.getElementById("pipInfoModal").style.display = "none";
+}
 </script>
 
   <!-- Modal for Risk Type Info -->
@@ -495,6 +505,17 @@ function closeRiskInfo() {
     <button onclick="closeRiskInfo()" style="margin-top: 15px; padding: 10px 20px; background-color: #007aff; color: white; border: none; border-radius: 5px; cursor: pointer;">Close</button>
   </div>
 </div>
+<div id="pipInfoModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); justify-content: center; align-items: center;">
+  <div style="background-color: #333; color: #ffffff; padding: 20px; border-radius: 10px; max-width: 400px; width: 90%; text-align: center;">
+    <h3 style="color: #ffffff;">Pip Value Explanation</h3>
+    <p>To determine the pip value of an asset in MetaTrader 5:</p>
+    <p><strong>1.</strong> Place a pending order far away from the current market price so it won’t get triggered.</p>
+    <p><strong>2.</strong> Use a lot size of exactly 1 lot and set a stop loss 1 pip away from the entry price.</p>
+    <p><strong>3.</strong> The potential loss displayed under "Profit" in the terminal will represent the pip value for a 1-lot trade on that asset.</p>
+    <button onclick="closePipInfo()" style="margin-top: 15px; padding: 10px 20px; background-color: #007aff; color: white; border: none; border-radius: 5px; cursor: pointer;">Close</button>
+  </div>
+</div>
+  
   
 </body>
 </html>
