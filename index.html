@@ -6,7 +6,7 @@
   <title>TradeTrack Pro</title>
   <link rel="icon" href="favicon.ico" type="image/x-icon">
   <style>
-   /* Base styling */
+    /* Base Styling */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -14,27 +14,29 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     }
     body {
+      background-color: #121212;
       padding: 20px;
       display: flex;
       justify-content: center;
       align-items: center;
       flex-direction: column;
-      transition: background-color 0.3s, color 0.3s;
+      color: #E0E0E0;
     }
     h1 {
       font-size: 24px;
       font-weight: 600;
       text-align: center;
       margin-bottom: 20px;
+      color: #ffffff;
     }
     .container {
       max-width: 500px;
       width: 100%;
+      background-color: #1E1E1E;
       border-radius: 15px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
       padding: 20px;
       margin-top: 20px;
-      transition: background-color 0.3s;
     }
     .section {
       margin-bottom: 20px;
@@ -43,21 +45,42 @@
       display: block;
       font-weight: 500;
       margin-bottom: 6px;
-      transition: color 0.3s;
+      color: #B3B3B3;
     }
     input[type="number"], input[type="date"], select {
       width: 100%;
       padding: 12px;
       font-size: 16px;
       margin-bottom: 10px;
+      border: 1px solid #333;
       border-radius: 8px;
-      transition: background-color 0.3s, color 0.3s;
+      background-color: #333;
+      color: #E0E0E0;
+      transition: border-color 0.3s ease;
+    }
+    input[type="number"]:focus, input[type="date"]:focus, select:focus {
+      border-color: #007aff;
+      outline: none;
     }
     .date-group {
       display: flex;
       align-items: center;
       gap: 10px;
       margin-top: 10px;
+    }
+    .date-button {
+      background-color: #007aff;
+      color: #fff;
+      font-size: 20px;
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .date-button:hover {
+      background-color: #005bb5;
     }
     .button-group {
       display: flex;
@@ -69,83 +92,117 @@
       padding: 12px;
       font-size: 16px;
       font-weight: 500;
+      border: none;
       border-radius: 8px;
       cursor: pointer;
-      transition: background-color 0.3s;
+      transition: background-color 0.3s ease;
+      color: #fff;
+    }
+    .win-button {
+      background-color: #34c759;
+    }
+    .win-button:hover {
+      background-color: #2a9d4d;
+    }
+    .loss-button {
+      background-color: #ff3b30;
+    }
+    .loss-button:hover {
+      background-color: #d12a21;
+    }
+    .reset-button, .export-button, .back-button {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      font-weight: 500;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 15px;
+      transition: background-color 0.3s ease;
+    }
+    .reset-button {
+      background-color: #007aff;
+    }
+    .reset-button:hover {
+      background-color: #005bb5;
+    }
+    .export-button {
+      background-color: #34c759;
+    }
+    .export-button:hover {
+      background-color: #2a9d4d;
+    }
+    .back-button {
+      background-color: #ff9500;
+      margin-top: 10px;
+    }
+    .back-button:hover {
+      background-color: #cc7a00;
     }
     .summary, .log-section {
+      background-color: #1E1E1E;
       padding: 15px;
       border-radius: 10px;
       margin-top: 20px;
-      transition: background-color 0.3s, color 0.3s;
+    }
+    .summary h2, .log-section h2 {
+      font-size: 18px;
+      color: #E0E0E0;
+      margin-bottom: 10px;
+      font-weight: 500;
     }
     .summary p, .log-section p {
       font-size: 16px;
+      color: #B3B3B3;
       margin: 8px 0;
     }
     .trade-log {
       max-height: 200px;
       overflow-y: auto;
       margin-top: 10px;
+      border-top: 1px solid #333;
       padding-top: 10px;
     }
-    /* Dark Mode */
-    body.dark-mode {
-      background-color: #1a1a1a;
-      color: #f5f5f5;
+    .trade-log ul {
+      list-style-type: none;
+      padding: 0;
     }
-    .container.dark-mode, .summary.dark-mode, .log-section.dark-mode {
+    .trade-log li {
+      padding: 8px;
+      border-bottom: 1px solid #333;
+      font-size: 14px;
+      color: #E0E0E0;
+    }
+    .trade-log li:last-child {
+      border-bottom: none;
+    }
+    /* Toggle for Dark Mode */
+    .toggle-button {
       background-color: #333;
-    }
-    input[type="number"].dark-mode, input[type="date"].dark-mode, select.dark-mode {
-      background-color: #444;
       color: #fff;
-    }
-    label.dark-mode {
-      color: #ccc;
-    }
-    .button-group button.dark-mode, .date-button.dark-mode {
-      background-color: #666;
-    }
-    /* Light Mode */
-    body.light-mode {
-      background-color: #fefefe;
-      color: #333;
-    }
-    .container.light-mode, .summary.light-mode, .log-section.light-mode {
-      background-color: #fff;
-    }
-    input[type="number"].light-mode, input[type="date"].light-mode, select.light-mode {
-      background-color: #f9f9f9;
-      color: #333;
-    }
-    label.light-mode {
-      color: #555;
-    }
-    .button-group button.light-mode, .date-button.light-mode {
-      background-color: #007aff;
-    }
-    /* Toggle button */
-    .toggle-container {
-      position: fixed;
-      top: 20px;
-      right: 20px;
+      padding: 10px;
+      border-radius: 8px;
       cursor: pointer;
-      font-size: 18px;
+      margin-bottom: 20px;
+      font-weight: bold;
+      font-size: 16px;
+      text-align: center;
+    }
+    .toggle-button:hover {
+      background-color: #555;
     }
   </style>
 </head>
 <body>
 
+<!-- Header Container -->
+<div style="width: 100%; max-width: 500px; background-color: black; padding: 15px; text-align: center; border-radius: 10px; margin-bottom: 20px;">
+  <h1 style="color: white; font-size: 24px; font-weight: bold; margin: 0;">TradeTrack Pro</h1>
+</div>
 
-  <!-- Header and Toggle Button -->
-  <div style="width: 100%; max-width: 500px; background-color: black; padding: 15px; text-align: center; border-radius: 10px; margin-bottom: 20px;">
-    <h1 style="color: white; font-size: 24px; font-weight: bold; margin: 0;">TradeTrack Pro</h1>
-  </div>
-  
-  <div class="toggle-container" onclick="toggleDarkMode()">
-    <span class="toggle-icon">🌙</span>
-  </div>
+<div class="toggle-button" onclick="toggleDarkMode()">Toggle Dark/Light Mode</div>
 
 <div class="container">
   <!-- General Settings -->
@@ -155,8 +212,8 @@
     <input type="number" id="initial-capital" placeholder="Enter initial capital" value="10000" onchange="updateInitialCapital()">
 
     <label for="risk-type">Risk Type:
-  <span style="cursor: pointer; color: #007aff; font-weight: bold;" onclick="showRiskInfo()">ℹ️</span>
-</label>
+      <span style="cursor: pointer; color: #007aff; font-weight: bold;" onclick="showRiskInfo()">ℹ️</span>
+    </label>
     <select id="risk-type" onchange="recalculateAllTrades()">
       <option value="fixed-daily">Daily Fixed Percentage Risk</option>
       <option value="compounding">Compounding Risk (Per Trade)</option>
@@ -227,240 +284,241 @@
 </div>
 
 <script>
-  let initialCapital = parseFloat(document.getElementById("initial-capital").value);
-  let currentBalance = initialCapital;
-  let totalTrades = 0, wins = 0, losses = 0;
-  let winStreak = 0, lossStreak = 0, maxWinStreak = 0, maxLossStreak = 0;
-  let totalFees = 0, totalPnLAfterFees = 0;
-  let maxDrawdown = 0, peakBalance = initialCapital;
-  let totalWinningPnL = 0, totalLosingPnL = 0;
-  let totalRsAchieved = 0; // Total Rs achieved
-  let tradeLog = []; // Visible log for the user
-  let rawTradeLog = []; // Hidden log with raw data for recalculations
-  let startDate = ""; // Starting date of performance
-  let endDate = ""; // Ending date of performance
-  let lastTradeDate = ""; // Track the date of the last trade
-  let riskType = document.getElementById("risk-type").value;
-  let dailyRiskAmount = 0;
-
-  // Event listeners for updating settings
-  document.getElementById("risk-type").addEventListener("change", () => {
-    riskType = document.getElementById("risk-type").value;
-    recalculateAllTrades();
-  });
-
-  document.getElementById("initial-capital").addEventListener("change", () => {
-    initialCapital = parseFloat(document.getElementById("initial-capital").value);
-    recalculateAllTrades();
-  });
-
-  document.getElementById("risk-amount").addEventListener("change", () => {
-    recalculateAllTrades();
-  });
-
-  function updateInitialCapital() {
-    initialCapital = parseFloat(document.getElementById("initial-capital").value);
-    currentBalance = initialCapital;
-    peakBalance = initialCapital;
-    recalculateAllTrades();
-  }
-
-  function adjustDate(increment) {
-    const dateInput = document.getElementById("trade-date");
-    let currentDate = new Date(dateInput.value || new Date());
-    currentDate.setDate(currentDate.getDate() + increment);
-    dateInput.value = currentDate.toISOString().split("T")[0];
-  }
-
-  function recalculateAllTrades() {
-    // Reset variables for recalculations
-    currentBalance = initialCapital;
-    totalTrades = wins = losses = winStreak = lossStreak = maxWinStreak = maxLossStreak = totalFees = totalPnLAfterFees = totalWinningPnL = totalLosingPnL = maxDrawdown = totalRsAchieved = 0;
-    peakBalance = initialCapital;
-    dailyRiskAmount = 0;
-    tradeLog = []; // Clear visible log
-    lastTradeDate = ""; 
-
-    // Recalculate each trade in rawTradeLog
-    rawTradeLog.forEach(rawTrade => recordTrade(rawTrade.outcome, true, rawTrade.date, rawTrade.rr, rawTrade.slDistance));
-
-    updateSummary();
-    updateTradeLog();
-  }
-
-  function recordTrade(outcome, recalculating = false, tradeDate = "", rr = 0, slDistance = 0) {
-    rr = recalculating ? rr : parseFloat(document.getElementById("rr").value);
-    slDistance = recalculating ? slDistance : parseFloat(document.getElementById("sl-distance").value);
-    const pipValue = parseFloat(document.getElementById("pip-value").value) || 1;
-    const riskAmount = parseFloat(document.getElementById("risk-amount").value);
-    const costPerLot = parseFloat(document.getElementById("cost-per-lot").value) || 0;
-    const date = tradeDate || document.getElementById("trade-date").value;
-
-    if (!recalculating && (isNaN(rr) || isNaN(slDistance) || isNaN(pipValue) || isNaN(riskAmount) || isNaN(costPerLot))) {
-      alert("Please fill in all fields.");
-      return;
-    }
-
-    let tradeRisk;
-    if (riskType === "fixed-daily") {
-      if (lastTradeDate !== date) {
-        dailyRiskAmount = currentBalance * (riskAmount / 100);
-        lastTradeDate = date;
-      }
-      tradeRisk = dailyRiskAmount;
-    } else if (riskType === "compounding") {
-      tradeRisk = currentBalance * (riskAmount / 100);
-    } else {
-      tradeRisk = riskAmount;
-    }
-    const lots = tradeRisk / (pipValue * slDistance);
-    const fee = lots * costPerLot;
-    totalFees += fee;
-
-    let profitOrLoss = 0;
-    if (outcome === "Win") {
-      profitOrLoss = tradeRisk * rr;
-      totalWinningPnL += profitOrLoss;
-      wins++;
-      winStreak++;
-      lossStreak = 0;
-      totalRsAchieved += rr;
-    } else {
-      profitOrLoss = -tradeRisk * Math.abs(rr);
-      totalLosingPnL += Math.abs(profitOrLoss);
-      losses++;
-      lossStreak++;
-      winStreak = 0;
-      totalRsAchieved -= Math.abs(rr);
-    }
-
-    const finalPnL = profitOrLoss - fee;
-    currentBalance += finalPnL;
-    totalPnLAfterFees += finalPnL;
-
-    totalTrades++;
-    maxWinStreak = Math.max(maxWinStreak, winStreak);
-    maxLossStreak = Math.max(maxLossStreak, lossStreak);
-
-    peakBalance = Math.max(peakBalance, currentBalance);
-    const drawdown = peakBalance - currentBalance;
-    maxDrawdown = Math.max(maxDrawdown, drawdown);
-
-    if (!recalculating) {
-      rawTradeLog.push({ date, outcome, rr, slDistance }); // Store raw trade data
-    }
-    
-    const rrDisplay = outcome === "Win" ? rr.toFixed(2) : (-Math.abs(rr)).toFixed(2);
-    tradeLog.push({ date, outcome, riskAmount: tradeRisk.toFixed(2), lots: lots.toFixed(2), rr: rrDisplay, slDistance, profitOrLoss: profitOrLoss.toFixed(2), fee: fee.toFixed(2), finalPnL: finalPnL.toFixed(2), balance: currentBalance.toFixed(2) });
-
-    if (totalTrades === 1) startDate = date;
-    endDate = date;
-    updateSummary();
-    updateTradeLog();
-  }
-
-  function goBack() {
-    if (tradeLog.length === 0) {
-      alert("No trades to remove.");
-      return;
-    }
-
-    rawTradeLog.pop(); // Remove from raw log as well
-    const lastTrade = tradeLog.pop();
-    currentBalance -= parseFloat(lastTrade.finalPnL);
-    totalPnLAfterFees -= parseFloat(lastTrade.finalPnL);
-    totalFees -= parseFloat(lastTrade.fee);
-
-    const rrValue = parseFloat(lastTrade.rr);
-    if (rrValue > 0) {
-      wins--;
-      totalWinningPnL -= parseFloat(lastTrade.profitOrLoss);
-      winStreak--;
-      totalRsAchieved -= rrValue;
-    } else {
-      losses--;
-      totalLosingPnL -= Math.abs(parseFloat(lastTrade.profitOrLoss));
-      lossStreak--;
-      totalRsAchieved += Math.abs(rrValue);
-    }
-
-    totalTrades--;
-    updateSummary();
-    updateTradeLog();
-  }
-
-  function updateSummary() {
-    document.getElementById("total-trades").textContent = totalTrades;
-    document.getElementById("win-rate").textContent = totalTrades > 0 ? ((wins / totalTrades) * 100).toFixed(2) + "%" : "0%";
-    document.getElementById("max-win-streak").textContent = maxWinStreak;
-    document.getElementById("max-loss-streak").textContent = maxLossStreak;
-    document.getElementById("max-drawdown").textContent = `${((maxDrawdown / peakBalance) * 100).toFixed(2)}% / $${maxDrawdown.toFixed(2)}`;
-    document.getElementById("average-win").textContent = wins > 0 ? (totalWinningPnL / wins).toFixed(2) : "0";
-    document.getElementById("average-loss").textContent = losses > 0 ? (totalLosingPnL / losses).toFixed(2) : "0";
-    document.getElementById("profit-factor").textContent = totalLosingPnL > 0 ? (totalWinningPnL / totalLosingPnL).toFixed(2) : "0";
-    document.getElementById("total-fees").textContent = totalFees.toFixed(2);
-    document.getElementById("pnl-after-fees").textContent = totalPnLAfterFees.toFixed(2);
-    document.getElementById("cumulative-balance").textContent = currentBalance.toFixed(2);
-    document.getElementById("total-rs-achieved").textContent = totalRsAchieved.toFixed(2);
-    document.getElementById("date-range").textContent = `${startDate} to ${endDate}`;
-  }
-
-  function updateTradeLog() {
-    const tradeLogEl = document.getElementById("trade-log");
-    tradeLogEl.innerHTML = "";
-    tradeLog.forEach((trade) => {
-      const li = document.createElement("li");
-      li.textContent = `${trade.date} - Risk: ${trade.riskAmount}, Lots: ${trade.lots}, RR: ${trade.rr}, SL: ${trade.slDistance} pips, PnL: ${trade.profitOrLoss}, Fees: ${trade.fee}, Final PnL: ${trade.finalPnL} (Balance: ${trade.balance})`;
-      tradeLogEl.appendChild(li);
+  let darkMode = true;
+  function toggleDarkMode() {
+    darkMode = !darkMode;
+    document.body.style.backgroundColor = darkMode ? "#121212" : "#FFFFFF";
+    document.body.style.color = darkMode ? "#E0E0E0" : "#333";
+    document.querySelectorAll(".container, .summary, .log-section").forEach(el => {
+      el.style.backgroundColor = darkMode ? "#1E1E1E" : "#FFFFFF";
+    });
+    document.querySelectorAll("input, select").forEach(el => {
+      el.style.backgroundColor = darkMode ? "#333" : "#F9F9F9";
+      el.style.color = darkMode ? "#E0E0E0" : "#333";
+      el.style.borderColor = darkMode ? "#333" : "#DDD";
     });
   }
+  let initialCapital = parseFloat(document.getElementById("initial-capital").value);
+let currentBalance = initialCapital;
+let totalTrades = 0, wins = 0, losses = 0;
+let winStreak = 0, lossStreak = 0, maxWinStreak = 0, maxLossStreak = 0;
+let totalFees = 0, totalPnLAfterFees = 0;
+let maxDrawdown = 0, peakBalance = initialCapital;
+let totalWinningPnL = 0, totalLosingPnL = 0;
+let totalRsAchieved = 0; // Total Rs achieved
+let tradeLog = []; // Visible log for the user
+let rawTradeLog = []; // Hidden log with raw data for recalculations
+let startDate = ""; // Starting date of performance
+let endDate = ""; // Ending date of performance
+let lastTradeDate = ""; // Track the date of the last trade
+let riskType = document.getElementById("risk-type").value;
+let dailyRiskAmount = 0;
 
-  function resetBacktest() {
-    currentBalance = initialCapital;
-    totalTrades = wins = losses = winStreak = lossStreak = maxWinStreak = maxLossStreak = totalFees = totalPnLAfterFees = totalWinningPnL = totalLosingPnL = maxDrawdown = totalRsAchieved = 0;
-    peakBalance = initialCapital;
-    tradeLog = [];
-    rawTradeLog = []; // Reset raw log
-    startDate = "";
-    endDate = "";
-    updateSummary();
-    updateTradeLog();
+// Event listeners for updating settings
+document.getElementById("risk-type").addEventListener("change", () => {
+  riskType = document.getElementById("risk-type").value;
+  recalculateAllTrades();
+});
+
+document.getElementById("initial-capital").addEventListener("change", () => {
+  initialCapital = parseFloat(document.getElementById("initial-capital").value);
+  recalculateAllTrades();
+});
+
+document.getElementById("risk-amount").addEventListener("change", () => {
+  recalculateAllTrades();
+});
+
+function updateInitialCapital() {
+  initialCapital = parseFloat(document.getElementById("initial-capital").value);
+  currentBalance = initialCapital;
+  peakBalance = initialCapital;
+  recalculateAllTrades();
+}
+
+function adjustDate(increment) {
+  const dateInput = document.getElementById("trade-date");
+  let currentDate = new Date(dateInput.value || new Date());
+  currentDate.setDate(currentDate.getDate() + increment);
+  dateInput.value = currentDate.toISOString().split("T")[0];
+}
+
+function recalculateAllTrades() {
+  // Reset variables for recalculations
+  currentBalance = initialCapital;
+  totalTrades = wins = losses = winStreak = lossStreak = maxWinStreak = maxLossStreak = totalFees = totalPnLAfterFees = totalWinningPnL = totalLosingPnL = maxDrawdown = totalRsAchieved = 0;
+  peakBalance = initialCapital;
+  dailyRiskAmount = 0;
+  tradeLog = []; // Clear visible log
+  lastTradeDate = ""; 
+
+  // Recalculate each trade in rawTradeLog
+  rawTradeLog.forEach(rawTrade => recordTrade(rawTrade.outcome, true, rawTrade.date, rawTrade.rr, rawTrade.slDistance));
+
+  updateSummary();
+  updateTradeLog();
+}
+
+function recordTrade(outcome, recalculating = false, tradeDate = "", rr = 0, slDistance = 0) {
+  rr = recalculating ? rr : parseFloat(document.getElementById("rr").value);
+  slDistance = recalculating ? slDistance : parseFloat(document.getElementById("sl-distance").value);
+  const pipValue = parseFloat(document.getElementById("pip-value").value) || 1;
+  const riskAmount = parseFloat(document.getElementById("risk-amount").value);
+  const costPerLot = parseFloat(document.getElementById("cost-per-lot").value) || 0;
+  const date = tradeDate || document.getElementById("trade-date").value;
+
+  if (!recalculating && (isNaN(rr) || isNaN(slDistance) || isNaN(pipValue) || isNaN(riskAmount) || isNaN(costPerLot))) {
+    alert("Please fill in all fields.");
+    return;
   }
 
-  function exportLog() {
-    const headers = "Date,Risk Amount,Lots,RR,SL Distance (pips),PnL,Fees,Final PnL,Balance\n";
-    const csvContent = tradeLog.map(trade => 
-      `${trade.date},${trade.riskAmount},${trade.lots},${trade.rr},${trade.slDistance},${trade.profitOrLoss},${trade.fee},${trade.finalPnL},${trade.balance}`
-    ).join("\n");
-    const blob = new Blob([headers + csvContent], { type: "text/csv" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "trade-log.csv";
-    link.click();
+  let tradeRisk;
+  if (riskType === "fixed-daily") {
+    if (lastTradeDate !== date) {
+      dailyRiskAmount = currentBalance * (riskAmount / 100);
+      lastTradeDate = date;
+    }
+    tradeRisk = dailyRiskAmount;
+  } else if (riskType === "compounding") {
+    tradeRisk = currentBalance * (riskAmount / 100);
+  } else {
+    tradeRisk = riskAmount;
+  }
+  const lots = tradeRisk / (pipValue * slDistance);
+  const fee = lots * costPerLot;
+  totalFees += fee;
+
+  let profitOrLoss = 0;
+  if (outcome === "Win") {
+    profitOrLoss = tradeRisk * rr;
+    totalWinningPnL += profitOrLoss;
+    wins++;
+    winStreak++;
+    lossStreak = 0;
+    totalRsAchieved += rr;
+  } else {
+    profitOrLoss = -tradeRisk * Math.abs(rr);
+    totalLosingPnL += Math.abs(profitOrLoss);
+    losses++;
+    lossStreak++;
+    winStreak = 0;
+    totalRsAchieved -= Math.abs(rr);
   }
 
-  function showRiskInfo() {
+  const finalPnL = profitOrLoss - fee;
+  currentBalance += finalPnL;
+  totalPnLAfterFees += finalPnL;
+
+  totalTrades++;
+  maxWinStreak = Math.max(maxWinStreak, winStreak);
+  maxLossStreak = Math.max(maxLossStreak, lossStreak);
+
+  peakBalance = Math.max(peakBalance, currentBalance);
+  const drawdown = peakBalance - currentBalance;
+  maxDrawdown = Math.max(maxDrawdown, drawdown);
+
+  if (!recalculating) {
+    rawTradeLog.push({ date, outcome, rr, slDistance }); // Store raw trade data
+  }
+  
+  const rrDisplay = outcome === "Win" ? rr.toFixed(2) : (-Math.abs(rr)).toFixed(2);
+  tradeLog.push({ date, outcome, riskAmount: tradeRisk.toFixed(2), lots: lots.toFixed(2), rr: rrDisplay, slDistance, profitOrLoss: profitOrLoss.toFixed(2), fee: fee.toFixed(2), finalPnL: finalPnL.toFixed(2), balance: currentBalance.toFixed(2) });
+
+  if (totalTrades === 1) startDate = date;
+  endDate = date;
+  updateSummary();
+  updateTradeLog();
+}
+
+function goBack() {
+  if (tradeLog.length === 0) {
+    alert("No trades to remove.");
+    return;
+  }
+
+  rawTradeLog.pop(); // Remove from raw log as well
+  const lastTrade = tradeLog.pop();
+  currentBalance -= parseFloat(lastTrade.finalPnL);
+  totalPnLAfterFees -= parseFloat(lastTrade.finalPnL);
+  totalFees -= parseFloat(lastTrade.fee);
+
+  const rrValue = parseFloat(lastTrade.rr);
+  if (rrValue > 0) {
+    wins--;
+    totalWinningPnL -= parseFloat(lastTrade.profitOrLoss);
+    winStreak--;
+    totalRsAchieved -= rrValue;
+  } else {
+    losses--;
+    totalLosingPnL -= Math.abs(parseFloat(lastTrade.profitOrLoss));
+    lossStreak--;
+    totalRsAchieved += Math.abs(rrValue);
+  }
+
+  totalTrades--;
+  updateSummary();
+  updateTradeLog();
+}
+
+function updateSummary() {
+  document.getElementById("total-trades").textContent = totalTrades;
+  document.getElementById("win-rate").textContent = totalTrades > 0 ? ((wins / totalTrades) * 100).toFixed(2) + "%" : "0%";
+  document.getElementById("max-win-streak").textContent = maxWinStreak;
+  document.getElementById("max-loss-streak").textContent = maxLossStreak;
+  document.getElementById("max-drawdown").textContent = `${((maxDrawdown / peakBalance) * 100).toFixed(2)}% / $${maxDrawdown.toFixed(2)}`;
+  document.getElementById("average-win").textContent = wins > 0 ? (totalWinningPnL / wins).toFixed(2) : "0";
+  document.getElementById("average-loss").textContent = losses > 0 ? (totalLosingPnL / losses).toFixed(2) : "0";
+  document.getElementById("profit-factor").textContent = totalLosingPnL > 0 ? (totalWinningPnL / totalLosingPnL).toFixed(2) : "0";
+  document.getElementById("total-fees").textContent = totalFees.toFixed(2);
+  document.getElementById("pnl-after-fees").textContent = totalPnLAfterFees.toFixed(2);
+  document.getElementById("cumulative-balance").textContent = currentBalance.toFixed(2);
+  document.getElementById("total-rs-achieved").textContent = totalRsAchieved.toFixed(2);
+  document.getElementById("date-range").textContent = `${startDate} to ${endDate}`;
+}
+
+function updateTradeLog() {
+  const tradeLogEl = document.getElementById("trade-log");
+  tradeLogEl.innerHTML = "";
+  tradeLog.forEach((trade) => {
+    const li = document.createElement("li");
+    li.textContent = `${trade.date} - Risk: ${trade.riskAmount}, Lots: ${trade.lots}, RR: ${trade.rr}, SL: ${trade.slDistance} pips, PnL: ${trade.profitOrLoss}, Fees: ${trade.fee}, Final PnL: ${trade.finalPnL} (Balance: ${trade.balance})`;
+    tradeLogEl.appendChild(li);
+  });
+}
+
+function resetBacktest() {
+  currentBalance = initialCapital;
+  totalTrades = wins = losses = winStreak = lossStreak = maxWinStreak = maxLossStreak = totalFees = totalPnLAfterFees = totalWinningPnL = totalLosingPnL = maxDrawdown = totalRsAchieved = 0;
+  peakBalance = initialCapital;
+  tradeLog = [];
+  rawTradeLog = []; // Reset raw log
+  startDate = "";
+  endDate = "";
+  updateSummary();
+  updateTradeLog();
+}
+
+function exportLog() {
+  const headers = "Date,Risk Amount,Lots,RR,SL Distance (pips),PnL,Fees,Final PnL,Balance\n";
+  const csvContent = tradeLog.map(trade => 
+    `${trade.date},${trade.riskAmount},${trade.lots},${trade.rr},${trade.slDistance},${trade.profitOrLoss},${trade.fee},${trade.finalPnL},${trade.balance}`
+  ).join("\n");
+  const blob = new Blob([headers + csvContent], { type: "text/csv" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "trade-log.csv";
+  link.click();
+}
+
+function showRiskInfo() {
   document.getElementById("riskInfoModal").style.display = "flex";
 }
 
 function closeRiskInfo() {
   document.getElementById("riskInfoModal").style.display = "none";
 }
-
-    function toggleDarkMode() {
-    document.body.classList.toggle('dark-mode');
-    document.body.classList.toggle('light-mode');
-    
-    const toggleIcon = document.querySelector('.toggle-icon');
-    if (document.body.classList.contains('dark-mode')) {
-      toggleIcon.textContent = '☀️'; // Switch icon to sun for light mode
-    } else {
-      toggleIcon.textContent = '🌙'; // Switch icon to moon for dark mode
-    }
-  }
 </script>
 
-  <!-- Modal for Risk Type Info -->
 <div id="riskInfoModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); justify-content: center; align-items: center;">
   <div style="background-color: white; padding: 20px; border-radius: 10px; max-width: 400px; width: 90%; text-align: center;">
     <h3>Risk Type Explanation</h3>
@@ -470,6 +528,6 @@ function closeRiskInfo() {
     <button onclick="closeRiskInfo()" style="margin-top: 15px; padding: 10px 20px; background-color: #007aff; color: white; border: none; border-radius: 5px; cursor: pointer;">Close</button>
   </div>
 </div>
-  
+
 </body>
 </html>
