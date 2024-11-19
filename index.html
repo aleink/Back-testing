@@ -120,11 +120,11 @@
       background-color: #d12a21;
     }
     .be-button {
-      background-color: #ff9500;
+      background-color: #007aff;
       margin: 10px 0;
     }
     .be-button:hover {
-      background-color: #cc7a00;
+      background-color: #005bb5;
     }
     .reset-button {
       background-color: #007aff;
@@ -328,9 +328,7 @@
     dailyRiskAmount = 0;
     tradeLog = [];
     lastTradeDate = "";
-
     rawTradeLog.forEach(rawTrade => recordTrade(rawTrade.outcome, true, rawTrade.date, rawTrade.rr, rawTrade.slDistance));
-
     updateSummary();
     updateTradeLog();
   }
@@ -344,7 +342,7 @@
     const date = tradeDate || document.getElementById("trade-date").value;
 
     if (!recalculating && (isNaN(pipValue) || isNaN(riskAmount) || isNaN(costPerLot) ||
-        (outcome !== 'BE' && (isNaN(rr) || isNaN(slDistance))))) {
+        (isNaN(rr) || isNaN(slDistance)))) {
       alert("Please fill in all fields.");
       return;
     }
@@ -352,7 +350,7 @@
     let tradeRisk;
     if (riskType === "fixed-daily") {
       if (lastTradeDate !== date) {
-        dailyRiskAmount = currentBalance * (riskAmount / 100);
+       dailyRiskAmount = currentBalance * (riskAmount / 100);
         lastTradeDate = date;
       }
       tradeRisk = dailyRiskAmount;
@@ -362,7 +360,8 @@
       tradeRisk = riskAmount;
     }
 
-    const lots = outcome === 'BE' ? 0 : (tradeRisk / (pipValue * slDistance));
+    // Calculate lots and fees for all trades, including BE
+    const lots = tradeRisk / (pipValue * slDistance);
     const fee = lots * costPerLot;
     totalFees += fee;
 
@@ -382,7 +381,7 @@
       winStreak = 0;
       totalRsAchieved -= Math.abs(rr);
     }
-    // BE trades only account for fees
+    // BE trades only account for fees, profitOrLoss remains 0
 
     const finalPnL = profitOrLoss - fee;
     currentBalance += finalPnL;
@@ -449,7 +448,7 @@
       lossStreak--;
       totalRsAchieved += Math.abs(parseFloat(lastTrade.rr));
     }
-    // No need to adjust win/loss counts for BE trades
+    // BE trades only need fee adjustment which is handled above
 
     totalTrades--;
     recalculateAllTrades(); // This will also update max profit and other metrics
