@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TradeTrack Pro</title>
   <link rel="icon" href="favicon.ico" type="image/x-icon">
-    <style>
+  <style>
     /* Styling */
     * {
       box-sizing: border-box;
@@ -96,7 +96,7 @@
       justify-content: space-between;
       gap: 10px;
     }
-    .win-button, .loss-button, .reset-button, .export-button, .back-button {
+    .win-button, .loss-button, .reset-button, .export-button, .back-button, .be-button {
       padding: 12px;
       font-size: 16px;
       font-weight: 500;
@@ -118,6 +118,13 @@
     }
     .loss-button:hover {
       background-color: #d12a21;
+    }
+    .be-button {
+      background-color: #ff9500;
+      margin: 10px 0;
+    }
+    .be-button:hover {
+      background-color: #cc7a00;
     }
     .reset-button {
       background-color: #007aff;
@@ -178,7 +185,6 @@
 </head>
 <body>
 
-
 <!-- Header Container -->
 <div style="width: 100%; max-width: 500px; background-color: #1c1c1c; padding: 15px; text-align: center; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);">
   <h1 style="color: #ffffff; font-size: 24px; font-weight: bold; margin: 0; letter-spacing: 1px;">TradeTrack Pro</h1>
@@ -192,8 +198,8 @@
     <input type="number" id="initial-capital" placeholder="Enter initial capital" value="10000" onchange="updateInitialCapital()">
 
     <label for="risk-type">Risk Type:
-  <span style="cursor: pointer; color: #007aff; font-weight: bold;" onclick="showRiskInfo()">ℹ️</span>
-</label>
+      <span style="cursor: pointer; color: #007aff; font-weight: bold;" onclick="showRiskInfo()">ℹ️</span>
+    </label>
     <select id="risk-type" onchange="recalculateAllTrades()">
       <option value="fixed-daily">Daily Fixed Percentage Risk</option>
       <option value="compounding">Compounding Risk (Per Trade)</option>
@@ -203,10 +209,10 @@
     <label for="risk-amount">Risk Amount (% or $):</label>
     <input type="number" id="risk-amount" placeholder="Enter risk amount" step="0.01" value="1">
 
-<label for="pip-value">Pip Value:
-  <span style="cursor: pointer; color: #007aff; font-weight: bold;" onclick="showPipInfo()">ℹ️</span>
-</label>
-<input type="number" id="pip-value" placeholder="Enter pip value" step="0.01">
+    <label for="pip-value">Pip Value:
+      <span style="cursor: pointer; color: #007aff; font-weight: bold;" onclick="showPipInfo()">ℹ️</span>
+    </label>
+    <input type="number" id="pip-value" placeholder="Enter pip value" step="0.01">
 
     <label for="cost-per-lot">Cost per Lot:</label>
     <input type="number" id="cost-per-lot" placeholder="Enter cost per lot" step="0.01">
@@ -233,6 +239,7 @@
       <button class="win-button" onclick="recordTrade('Win')">Record Win</button>
       <button class="loss-button" onclick="recordTrade('Loss')">Record Loss</button>
     </div>
+    <button class="be-button" onclick="recordTrade('BE')">Record Break-Even</button>
     <button class="back-button" onclick="goBack()">Go Back (Remove Last Trade)</button>
   </div>
 
@@ -244,6 +251,7 @@
     <p>Max Win Streak: <span id="max-win-streak">0</span></p>
     <p>Max Loss Streak: <span id="max-loss-streak">0</span></p>
     <p>Max Drawdown: <span id="max-drawdown">0% / $0</span></p>
+    <p>Max Profit: <span id="max-profit">$0 (Date: N/A)</span></p>
     <p>Average Win: <span id="average-win">0</span></p>
     <p>Average Loss: <span id="average-loss">0</span></p>
     <p>Profit Factor: <span id="profit-factor">0</span></p>
@@ -273,16 +281,17 @@
   let totalFees = 0, totalPnLAfterFees = 0;
   let maxDrawdown = 0, peakBalance = initialCapital;
   let totalWinningPnL = 0, totalLosingPnL = 0;
-  let totalRsAchieved = 0; // Total Rs achieved
-  let tradeLog = []; // Visible log for the user
-  let rawTradeLog = []; // Hidden log with raw data for recalculations
-  let startDate = ""; // Starting date of performance
-  let endDate = ""; // Ending date of performance
-  let lastTradeDate = ""; // Track the date of the last trade
+  let totalRsAchieved = 0;
+  let tradeLog = [];
+  let rawTradeLog = [];
+  let startDate = "";
+  let endDate = "";
+  let lastTradeDate = "";
   let riskType = document.getElementById("risk-type").value;
   let dailyRiskAmount = 0;
+  let maxProfit = 0;
+  let maxProfitDate = "";
 
-  // Event listeners for updating settings
   document.getElementById("risk-type").addEventListener("change", () => {
     riskType = document.getElementById("risk-type").value;
     recalculateAllTrades();
@@ -312,15 +321,14 @@
   }
 
   function recalculateAllTrades() {
-    // Reset variables for recalculations
     currentBalance = initialCapital;
-    totalTrades = wins = losses = winStreak = lossStreak = maxWinStreak = maxLossStreak = totalFees = totalPnLAfterFees = totalWinningPnL = totalLosingPnL = maxDrawdown = totalRsAchieved = 0;
+    totalTrades = wins = losses = winStreak = lossStreak = maxWinStreak = maxLossStreak = totalFees = totalPnLAfterFees = totalWinningPnL = totalLosingPnL = maxDrawdown = totalRsAchieved = maxProfit = 0;
+    maxProfitDate = "";
     peakBalance = initialCapital;
     dailyRiskAmount = 0;
-    tradeLog = []; // Clear visible log
-    lastTradeDate = ""; 
+    tradeLog = [];
+    lastTradeDate = "";
 
-    // Recalculate each trade in rawTradeLog
     rawTradeLog.forEach(rawTrade => recordTrade(rawTrade.outcome, true, rawTrade.date, rawTrade.rr, rawTrade.slDistance));
 
     updateSummary();
@@ -335,7 +343,8 @@
     const costPerLot = parseFloat(document.getElementById("cost-per-lot").value) || 0;
     const date = tradeDate || document.getElementById("trade-date").value;
 
-    if (!recalculating && (isNaN(rr) || isNaN(slDistance) || isNaN(pipValue) || isNaN(riskAmount) || isNaN(costPerLot))) {
+    if (!recalculating && (isNaN(pipValue) || isNaN(riskAmount) || isNaN(costPerLot) ||
+        (outcome !== 'BE' && (isNaN(rr) || isNaN(slDistance))))) {
       alert("Please fill in all fields.");
       return;
     }
@@ -352,7 +361,8 @@
     } else {
       tradeRisk = riskAmount;
     }
-    const lots = tradeRisk / (pipValue * slDistance);
+
+    const lots = outcome === 'BE' ? 0 : (tradeRisk / (pipValue * slDistance));
     const fee = lots * costPerLot;
     totalFees += fee;
 
@@ -364,7 +374,7 @@
       winStreak++;
       lossStreak = 0;
       totalRsAchieved += rr;
-    } else {
+    } else if (outcome === "Loss") {
       profitOrLoss = -tradeRisk * Math.abs(rr);
       totalLosingPnL += Math.abs(profitOrLoss);
       losses++;
@@ -372,6 +382,7 @@
       winStreak = 0;
       totalRsAchieved -= Math.abs(rr);
     }
+    // BE trades only account for fees
 
     const finalPnL = profitOrLoss - fee;
     currentBalance += finalPnL;
@@ -381,16 +392,33 @@
     maxWinStreak = Math.max(maxWinStreak, winStreak);
     maxLossStreak = Math.max(maxLossStreak, lossStreak);
 
+    // Update max profit tracking
+    if (currentBalance - initialCapital > maxProfit) {
+      maxProfit = currentBalance - initialCapital;
+      maxProfitDate = date;
+    }
     peakBalance = Math.max(peakBalance, currentBalance);
     const drawdown = peakBalance - currentBalance;
     maxDrawdown = Math.max(maxDrawdown, drawdown);
 
     if (!recalculating) {
-      rawTradeLog.push({ date, outcome, rr, slDistance }); // Store raw trade data
+      rawTradeLog.push({ date, outcome, rr, slDistance });
     }
     
-    const rrDisplay = outcome === "Win" ? rr.toFixed(2) : (-Math.abs(rr)).toFixed(2);
-    tradeLog.push({ date, outcome, riskAmount: tradeRisk.toFixed(2), lots: lots.toFixed(2), rr: rrDisplay, slDistance, profitOrLoss: profitOrLoss.toFixed(2), fee: fee.toFixed(2), finalPnL: finalPnL.toFixed(2), balance: currentBalance.toFixed(2) });
+    const rrDisplay = outcome === "Win" ? rr.toFixed(2) : 
+                     outcome === "Loss" ? (-Math.abs(rr)).toFixed(2) : "0.00";
+    tradeLog.push({ 
+      date, 
+      outcome, 
+      riskAmount: tradeRisk.toFixed(2), 
+      lots: lots.toFixed(2), 
+      rr: rrDisplay, 
+      slDistance, 
+      profitOrLoss: profitOrLoss.toFixed(2), 
+      fee: fee.toFixed(2), 
+      finalPnL: finalPnL.toFixed(2), 
+      balance: currentBalance.toFixed(2) 
+    });
 
     if (totalTrades === 1) startDate = date;
     endDate = date;
@@ -404,44 +432,44 @@
       return;
     }
 
-    rawTradeLog.pop(); // Remove from raw log as well
+    rawTradeLog.pop();
     const lastTrade = tradeLog.pop();
     currentBalance -= parseFloat(lastTrade.finalPnL);
     totalPnLAfterFees -= parseFloat(lastTrade.finalPnL);
     totalFees -= parseFloat(lastTrade.fee);
 
-    const rrValue = parseFloat(lastTrade.rr);
-    if (rrValue > 0) {
+    if (lastTrade.outcome === "Win") {
       wins--;
       totalWinningPnL -= parseFloat(lastTrade.profitOrLoss);
       winStreak--;
-      totalRsAchieved -= rrValue;
-    } else {
+      totalRsAchieved -= parseFloat(lastTrade.rr);
+    } else if (lastTrade.outcome === "Loss") {
       losses--;
       totalLosingPnL -= Math.abs(parseFloat(lastTrade.profitOrLoss));
       lossStreak--;
-      totalRsAchieved += Math.abs(rrValue);
+      totalRsAchieved += Math.abs(parseFloat(lastTrade.rr));
     }
+    // No need to adjust win/loss counts for BE trades
 
     totalTrades--;
-    updateSummary();
-    updateTradeLog();
+    recalculateAllTrades(); // This will also update max profit and other metrics
   }
 
   function updateSummary() {
     document.getElementById("total-trades").textContent = totalTrades;
-    document.getElementById("win-rate").textContent = totalTrades > 0 ? ((wins / totalTrades) * 100).toFixed(2) + "%" : "0%";
+    document.getElementById("win-rate").textContent = (wins + losses) > 0 ? ((wins / (wins + losses)) * 100).toFixed(2) + "%" : "0%";
     document.getElementById("max-win-streak").textContent = maxWinStreak;
     document.getElementById("max-loss-streak").textContent = maxLossStreak;
     document.getElementById("max-drawdown").textContent = `${((maxDrawdown / peakBalance) * 100).toFixed(2)}% / $${maxDrawdown.toFixed(2)}`;
+    document.getElementById("max-profit").textContent = `$${maxProfit.toFixed(2)} (Date: ${maxProfitDate || 'N/A'})`;
     document.getElementById("average-win").textContent = wins > 0 ? (totalWinningPnL / wins).toFixed(2) : "0";
     document.getElementById("average-loss").textContent = losses > 0 ? (totalLosingPnL / losses).toFixed(2) : "0";
     document.getElementById("profit-factor").textContent = totalLosingPnL > 0 ? (totalWinningPnL / totalLosingPnL).toFixed(2) : "0";
+    document.getElementById("total-rs-achieved").textContent = totalRsAchieved.toFixed(2);
+    document.getElementById("date-range").textContent = `${startDate} to ${endDate}`;
     document.getElementById("total-fees").textContent = totalFees.toFixed(2);
     document.getElementById("pnl-after-fees").textContent = totalPnLAfterFees.toFixed(2);
     document.getElementById("cumulative-balance").textContent = currentBalance.toFixed(2);
-    document.getElementById("total-rs-achieved").textContent = totalRsAchieved.toFixed(2);
-    document.getElementById("date-range").textContent = `${startDate} to ${endDate}`;
   }
 
   function updateTradeLog() {
@@ -449,17 +477,18 @@
     tradeLogEl.innerHTML = "";
     tradeLog.forEach((trade) => {
       const li = document.createElement("li");
-      li.textContent = `${trade.date} - Risk: ${trade.riskAmount}, Lots: ${trade.lots}, RR: ${trade.rr}, SL: ${trade.slDistance} pips, PnL: ${trade.profitOrLoss}, Fees: ${trade.fee}, Final PnL: ${trade.finalPnL} (Balance: ${trade.balance})`;
+      li.textContent = `${trade.date} - ${trade.outcome} - Risk: ${trade.riskAmount}, Lots: ${trade.lots}, RR: ${trade.rr}, SL: ${trade.slDistance} pips, PnL: ${trade.profitOrLoss}, Fees: ${trade.fee}, Final PnL: ${trade.finalPnL} (Balance: ${trade.balance})`;
       tradeLogEl.appendChild(li);
     });
   }
 
   function resetBacktest() {
     currentBalance = initialCapital;
-    totalTrades = wins = losses = winStreak = lossStreak = maxWinStreak = maxLossStreak = totalFees = totalPnLAfterFees = totalWinningPnL = totalLosingPnL = maxDrawdown = totalRsAchieved = 0;
+    totalTrades = wins = losses = winStreak = lossStreak = maxWinStreak = maxLossStreak = totalFees = totalPnLAfterFees = totalWinningPnL = totalLosingPnL = maxDrawdown = totalRsAchieved = maxProfit = 0;
+    maxProfitDate = "";
     peakBalance = initialCapital;
     tradeLog = [];
-    rawTradeLog = []; // Reset raw log
+    rawTradeLog = [];
     startDate = "";
     endDate = "";
     updateSummary();
@@ -467,9 +496,9 @@
   }
 
   function exportLog() {
-    const headers = "Date,Risk Amount,Lots,RR,SL Distance (pips),PnL,Fees,Final PnL,Balance\n";
+    const headers = "Date,Outcome,Risk Amount,Lots,RR,SL Distance (pips),PnL,Fees,Final PnL,Balance\n";
     const csvContent = tradeLog.map(trade => 
-      `${trade.date},${trade.riskAmount},${trade.lots},${trade.rr},${trade.slDistance},${trade.profitOrLoss},${trade.fee},${trade.finalPnL},${trade.balance}`
+      `${trade.date},${trade.outcome},${trade.riskAmount},${trade.lots},${trade.rr},${trade.slDistance},${trade.profitOrLoss},${trade.fee},${trade.finalPnL},${trade.balance}`
     ).join("\n");
     const blob = new Blob([headers + csvContent], { type: "text/csv" });
     const link = document.createElement("a");
@@ -479,23 +508,23 @@
   }
 
   function showRiskInfo() {
-  document.getElementById("riskInfoModal").style.display = "flex";
-}
+    document.getElementById("riskInfoModal").style.display = "flex";
+  }
 
-function closeRiskInfo() {
-  document.getElementById("riskInfoModal").style.display = "none";
-}
+  function closeRiskInfo() {
+    document.getElementById("riskInfoModal").style.display = "none";
+  }
 
   function showPipInfo() {
-  document.getElementById("pipInfoModal").style.display = "flex";
-}
+    document.getElementById("pipInfoModal").style.display = "flex";
+  }
 
-function closePipInfo() {
-  document.getElementById("pipInfoModal").style.display = "none";
-}
+  function closePipInfo() {
+    document.getElementById("pipInfoModal").style.display = "none";
+  }
 </script>
 
-  <!-- Modal for Risk Type Info -->
+<!-- Modal for Risk Type Info -->
 <div id="riskInfoModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); justify-content: center; align-items: center;">
   <div style="background-color: #333; color: #ffffff; padding: 20px; border-radius: 10px; max-width: 400px; width: 90%; text-align: center;">
     <h3 style="color: #ffffff;">Risk Type Explanation</h3>
@@ -505,17 +534,18 @@ function closePipInfo() {
     <button onclick="closeRiskInfo()" style="margin-top: 15px; padding: 10px 20px; background-color: #007aff; color: white; border: none; border-radius: 5px; cursor: pointer;">Close</button>
   </div>
 </div>
+
+<!-- Modal for Pip Value Info -->
 <div id="pipInfoModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); justify-content: center; align-items: center;">
   <div style="background-color: #333; color: #ffffff; padding: 20px; border-radius: 10px; max-width: 400px; width: 90%; text-align: center;">
     <h3 style="color: #ffffff;">Pip Value Explanation</h3>
     <p>To determine the pip value of an asset in MetaTrader 5:</p>
-    <p><strong>1.</strong> Place a pending order far away from the current market price so it won’t get triggered.</p>
+    <p><strong>1.</strong> Place a pending order far away from the current market price so it won't get triggered.</p>
     <p><strong>2.</strong> Use a lot size of exactly 1 lot and set a stop loss 1 pip away from the entry price.</p>
     <p><strong>3.</strong> The potential loss displayed under "Profit" in the terminal will represent the pip value for a 1-lot trade on that asset.</p>
     <button onclick="closePipInfo()" style="margin-top: 15px; padding: 10px 20px; background-color: #007aff; color: white; border: none; border-radius: 5px; cursor: pointer;">Close</button>
   </div>
 </div>
-  
-  
+
 </body>
 </html>
